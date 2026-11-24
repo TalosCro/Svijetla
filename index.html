@@ -2,97 +2,120 @@
 <html lang="hr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#14171c">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141113">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <title>Svjetla doma</title>
 <style>
-:root{color-scheme:dark;--bg:#14171c;--card:#1d2229;--line:#2c333d;--ink:#eef0f3;--mut:#9aa3af;--warm:#ffb547;--warm2:#ffd08a;--ok:#4cc38a;--bad:#ef5f5f}
+:root{color-scheme:dark;--bg:#141113;--card:#1c1715;--deep:#16120f;--line:#2f2720;--line2:#4a3a26;--ink:#f4efe8;--mut:#a89c8d;--warm:#ffb547;--warm2:#ffd79a;--glow:#ffc469;--ok:#5cc48c;--bad:#ef6f5f}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px 12px 32px;max-width:560px;margin-inline:auto}
+html{background:var(--bg)}
+body{margin:0 auto;max-width:560px;min-height:100vh;color:var(--ink);font:16px/1.4 Manrope,system-ui,sans-serif;padding:max(18px,env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom));background:radial-gradient(120% 420px at 85% -60px,#3a2a12 0%,rgba(20,17,19,0) 100%) no-repeat,var(--bg)}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
-.hd{display:flex;align-items:center;gap:6px;margin-bottom:12px}
-.hd h1{flex:1;margin:0;font-size:22px;font-weight:700}
-.btn{height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:13px}
-.btn.pri{background:var(--warm);border-color:var(--warm);color:#1a1205;font-weight:600}
-.icon{width:38px;padding:0;display:grid;place-items:center}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+.hd{display:flex;align-items:flex-end;gap:8px;margin-bottom:14px}
+.hd .t{flex:1}
+.hd small{display:block;font-size:13px;color:var(--mut)}
+.hd h1{margin:2px 0 0;font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+.hd .cnt{font-size:14px;color:var(--glow);margin-top:3px;font-weight:600}
+.rb{width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);background:#221b16;color:var(--glow);display:grid;place-items:center;padding:0;flex:none}
+.rb.off{color:var(--mut);border-color:var(--line)}
+.tmr{display:none;align-items:center;gap:10px;background:#2b2010;border:1px solid var(--line2);border-radius:14px;padding:8px 8px 8px 14px;margin-bottom:12px;font-size:14px;color:var(--warm2)}
+.tmr b{font-variant-numeric:tabular-nums}.tmr span{flex:1}
+.tmr button{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--deep);font-size:13px}
+.scn{display:flex;gap:8px;overflow-x:auto;margin:0 -14px 14px;padding:2px 14px;scrollbar-width:none}
+.scn::-webkit-scrollbar{display:none}
+.sc{flex:none;width:80px;height:66px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:#d8cdbf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:700;padding:0 6px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.sc i{width:18px;height:18px;border-radius:50%;display:block}
+.sc span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc.run,.sc.act{background:#3a2a12;border-color:var(--glow);color:var(--warm2)}
+.sc.new{border-style:dashed;color:var(--mut);font-weight:500}
+.sc.press,.ch.press{transform:scale(.95)}
 #list{display:flex;flex-direction:column;gap:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 12px}
-.card.on{border-color:#5a4520}
-.top{display:flex;align-items:center;gap:10px;min-height:32px}
-.dot{width:8px;height:8px;border-radius:50%;background:#4b535e;flex:none}
+.card{border:1px solid #2a231e;border-radius:20px;padding:11px 11px 11px 14px;background:var(--card);transition:border-color .3s}
+.card.on{border-color:var(--line2)}
+.top{display:flex;align-items:center;gap:10px;min-height:34px}
+.dot{width:7px;height:7px;border-radius:50%;background:#5a5047;flex:none}
 .dot.ok{background:var(--ok)}.dot.busy{background:var(--warm);animation:p 1s infinite}.dot.err{background:var(--bad)}
 @keyframes p{50%{opacity:.3}}
-.nm{flex:1;font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;text-align:left;padding:6px 0}
-.pc{font-size:15px;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
-.on .pc{color:var(--warm)}
-.sw{width:50px;height:30px;border-radius:15px;border:1px solid var(--line);background:var(--bg);position:relative;padding:0;flex:none}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--mut);transition:left .18s,background .18s}
-.sw[aria-pressed=true]{background:#4a3a1c;border-color:var(--warm)}.sw[aria-pressed=true]::after{left:23px;background:var(--warm)}
-.st{font-size:12px;color:var(--mut);margin:-2px 0 4px 18px}
-.st.err{color:#f19090}
+.nm{flex:1;font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;text-align:left;padding:6px 0}
+.pc{font-size:14px;font-weight:700;color:#8d8275;font-variant-numeric:tabular-nums}
+.on .pc{color:var(--glow)}
+.sw{width:48px;height:30px;border-radius:15px;border:0;background:#3a322b;position:relative;padding:0;flex:none}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#8d8275;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:left .18s,background .18s}
+.sw[aria-pressed=true]{background:var(--warm)}.sw[aria-pressed=true]::after{left:22px;background:#fff6e6}
+.st{font-size:12px;color:var(--mut);margin:-2px 0 6px 17px}.st.err{color:#f19a8e}
 .gr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
-.ch{height:50px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 4px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.ch span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ch b{font-size:14px}
-.ch.on{background:#3a2e17;border-color:var(--warm);color:var(--warm2)}
-.ch.press{transform:scale(.96)}
-.add{width:100%;height:52px;border-radius:16px;border:1px dashed var(--line);background:none;color:var(--mut)}
-.hint{font-size:13px;color:var(--mut);margin:10px 4px 0}
+.ch{height:56px;border-radius:12px;border:1px solid #2a231e;background:var(--deep);color:#8d8275;position:relative;overflow:hidden;padding:0 4px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.ch .fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,rgba(255,180,80,.42),rgba(255,180,80,.12));transition:height .35s}
+.ch .tx{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px}
+.ch .tx span{font-size:11px;opacity:.85;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch .tx b{font-size:14px}
+.ch.on{border-color:#5a4526;color:#ffe2b3}
+.add{width:100%;height:52px;border-radius:18px;border:1px dashed var(--line);background:none;color:var(--mut);margin-top:10px}
+.hint{font-size:13px;color:var(--mut);margin:12px 4px 0;line-height:1.45}
 .warn{background:#3a2020;border:1px solid #6b3030;border-radius:12px;padding:12px;margin-bottom:12px;font-size:14px}
-dialog.sh{margin:auto 0 0;width:100%;max-width:100%;border:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;background:var(--card);color:var(--ink);padding:10px 18px 24px}
-dialog.sh::backdrop{background:rgba(0,0,0,.55)}
-@media(min-width:600px){dialog.sh{max-width:520px;margin:auto;border-radius:22px;border:1px solid var(--line)}}
-.grip{width:40px;height:4px;border-radius:2px;background:#3a424d;margin:0 auto 14px}
-.shh{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.shh div{flex:1}.shh small{display:block;font-size:13px;color:var(--mut)}.shh strong{font-size:20px}
-.dial{position:relative;width:min(260px,72vw);aspect-ratio:1;margin:0 auto 4px;touch-action:none;user-select:none;-webkit-user-select:none}
-.dial svg{width:100%;height:100%;display:block;overflow:visible}
-.dial .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.dial .val b{font-size:46px;font-weight:700;color:var(--warm);font-variant-numeric:tabular-nums;line-height:1}
-.dial .val small{font-size:13px;color:var(--mut);margin-top:4px}
-.fine{display:flex;justify-content:center;gap:14px;margin:-34px 0 16px;position:relative}
-.fine button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:24px;line-height:1}
-.scn{display:flex;gap:8px;overflow-x:auto;margin:0 -12px 12px;padding:0 12px 2px;scrollbar-width:none}
-.scn::-webkit-scrollbar{display:none}
-.sc{flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:600;white-space:nowrap;user-select:none;-webkit-user-select:none}
-.sc.new{border-style:dashed;color:var(--mut);font-weight:400}
-.sc.run{border-color:var(--warm);color:var(--warm2)}
-.ci{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
-.ci input{width:20px;height:20px;accent-color:var(--warm)}
-.ci small{color:var(--mut);margin-left:auto;font-size:12px}
-.pre{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
-.pre button{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+dialog.sh{margin:auto 0 0;width:100%;max-width:100%;max-height:92vh;overflow:auto;border:0;border-top:1px solid #3a2f24;border-radius:26px 26px 0 0;background:var(--card);color:var(--ink);padding:12px 20px calc(24px + env(safe-area-inset-bottom))}
+dialog.sh::backdrop{background:rgba(0,0,0,.6)}
+@media(min-width:600px){dialog.sh{max-width:520px;margin:auto;border-radius:26px;border:1px solid #3a2f24}}
+.grip{width:40px;height:4px;border-radius:2px;background:#4a3f33;margin:0 auto 14px}
+.shh{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.shh div{flex:1}.shh small{display:block;font-size:13px;color:var(--mut)}.shh strong{font-size:22px;font-weight:800}
+.dial{position:relative;width:min(280px,76vw);aspect-ratio:1;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.dial>svg{width:100%;height:100%;display:block;overflow:visible}
+.dial .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:24px;pointer-events:none}
+.dial .val b{font-size:60px;font-weight:800;color:var(--glow);line-height:1;font-variant-numeric:tabular-nums;margin-top:6px}
+.dial .val b small{font-size:28px}
+.fine{display:flex;justify-content:center;gap:18px;margin:-58px 0 18px;position:relative}
+.fine button{width:56px;height:56px;border-radius:50%;border:1px solid #3a2f24;background:var(--deep);font-size:26px;line-height:1}
+.pre{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pre button{height:44px;border-radius:12px;border:1px solid #3a2f24;background:var(--deep);color:#d8cdbf;font-size:14px}
+.pre button.cur{border-color:var(--glow);background:#3a2a12;color:var(--warm2)}
 label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut);margin-bottom:12px}
-input[type=text],input[type=password]{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;font:inherit;font-size:16px;width:100%}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1;height:44px}
-.chk{display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 12px}
-#log{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;max-height:40vh;overflow:auto;background:#0d0f12;padding:10px;border-radius:10px;color:var(--mut)}
+input[type=text],input[type=password],input[type=number],select{height:46px;border-radius:12px;border:1px solid #3a2f24;background:var(--deep);color:var(--ink);padding:0 12px;font:inherit;font-size:16px;width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1}
+.btn{height:46px;padding:0 14px;border-radius:12px;border:1px solid #3a2f24;background:var(--deep);font-size:14px;font-weight:600}
+.btn.pri{background:var(--warm);border-color:var(--warm);color:#1a1205}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;margin:8px 0 12px}
+.chk input{width:20px;height:20px;accent-color:var(--warm)}
+.sec{font-size:13px;color:var(--mut);margin:18px 0 6px;font-weight:600}
+.ol{border:1px solid #2a231e;border-radius:14px;overflow:hidden}
+.oi{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;border-bottom:1px solid #2a231e;font-size:15px}
+.oi:last-child{border-bottom:0}.oi span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oi button{width:40px;height:40px;border-radius:10px;border:1px solid #3a2f24;background:var(--deep)}
+.oi input{width:20px;height:20px;accent-color:var(--warm)}.oi small{color:var(--mut);font-size:12px}
+.tg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#log{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;max-height:36vh;overflow:auto;background:#0d0b0c;padding:10px;border-radius:12px;color:var(--mut)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="hd">
-  <h1>Svjetla doma</h1>
-  <button class="btn pri" id="bAll1">Sve upali</button>
-  <button class="btn" id="bAll0">Sve ugasi</button>
-  <button class="btn icon" id="bSet" aria-label="Postavke"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
-</div>
+<header class="hd">
+  <div class="t"><small id="now"></small><h1 id="greet">Svjetla doma</h1><div class="cnt" id="cnt"></div></div>
+  <button class="rb off" id="bTimer" aria-label="Odgođeno gašenje"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M9 2h6"/></svg></button>
+  <button class="rb" id="bPower" aria-label="Upali ili ugasi sve"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></svg></button>
+  <button class="rb off" id="bSet" aria-label="Postavke"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+</header>
 <div id="warn"></div>
+<div class="tmr" id="tmr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/></svg><span>Sve se gasi za <b id="tmrLeft"></b></span><button id="tmrCancel">Otkaži</button></div>
 <div class="scn" id="scenes" aria-label="Scene"></div>
 <div id="list"></div>
-<button class="add" id="bAdd" style="margin-top:10px">+ Dodaj kontroler</button>
-<p class="hint">Tap na grupu pali/gasi. Dugi pritisak na grupu ili naziv kontrolera otvara jačinu. Dugi pritisak na scenu mijenja ili briše scenu.</p>
+<button class="add" id="bAdd">+ Dodaj kontroler</button>
+<p class="hint">Tap na grupu pali i gasi. Dugi pritisak na grupu ili naziv prostorije otvara jačinu. Dugi pritisak na scenu ili Noćno mijenja postavke.</p>
 
 <dialog class="sh" id="sheet">
   <div class="grip"></div>
   <div class="shh"><div><small id="sSub"></small><strong id="sTitle"></strong></div><button class="sw" id="sSw" aria-label="Upali ili ugasi"></button></div>
   <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Jačina svjetla" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <svg viewBox="0 0 240 240" aria-hidden="true"><path id="dTrack" fill="none" stroke="#2c333d" stroke-width="16" stroke-linecap="round"/><path id="dArc" pathLength="100" fill="none" stroke="#ffb547" stroke-width="16" stroke-linecap="round"/><circle id="dKnob" r="19" fill="#ffd08a" stroke="#14171c" stroke-width="5"/></svg>
-    <div class="val"><b id="sOut">0%</b><small>povuci po krugu</small></div>
+    <svg viewBox="0 0 240 240" aria-hidden="true"><defs><linearGradient id="arcg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#e0804a"/><stop offset="1" stop-color="#ffd27a"/></linearGradient></defs><path id="dTrack" fill="none" stroke="#2c241d" stroke-width="18" stroke-linecap="round"/><path id="dArc" pathLength="100" fill="none" stroke="url(#arcg)" stroke-width="18" stroke-linecap="round"/><circle id="dKnob" r="21" fill="#fff6e6" stroke="#1c1715" stroke-width="6"/><circle id="dKnob2" r="6" fill="#ffb547"/></svg>
+    <div class="val"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffc469" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg><b id="sOut">0<small>%</small></b></div>
   </div>
   <div class="fine"><button id="dMinus" aria-label="Smanji za 1%">−</button><button id="dPlus" aria-label="Povećaj za 1%">+</button></div>
-  <div class="pre"><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="60">60%</button><button data-p="100">100%</button></div>
+  <div class="pre" id="pre"><button data-p="1">1%</button><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="50">50%</button><button data-p="100">100%</button></div>
   <label class="f" id="sNameL">Naziv grupe<input type="text" id="sName" autocomplete="off"></label>
   <div class="row" id="sCtrlBtns"><button class="btn" id="sConn">Spoji ponovno</button><button class="btn" id="sPw">Lozinka</button><button class="btn" id="sDel">Ukloni</button></div>
   <div class="row" style="margin-top:8px"><button class="btn" id="sClose">Zatvori</button></div>
@@ -101,20 +124,40 @@ input[type=text],input[type=password]{height:44px;border-radius:10px;border:1px 
 <dialog class="sh" id="scd">
   <div class="grip"></div>
   <div class="shh"><div><strong id="scTitle">Nova scena</strong></div></div>
-  <label class="f">Naziv scene<input type="text" id="scName" autocomplete="off" placeholder="npr. Večer, Film, Noćno"></label>
-  <div style="font-size:13px;color:var(--mut)">Spremi trenutno stanje ovih kontrolera:</div>
-  <div id="scList" style="margin-bottom:14px"></div>
+  <label class="f">Naziv scene<input type="text" id="scName" autocomplete="off" placeholder="npr. Večer, Film, Dan"></label>
+  <div class="sec" style="margin-top:4px">Spremi trenutno stanje ovih prostorija</div>
+  <div class="ol" id="scList" style="margin-bottom:14px"></div>
   <div class="row"><button class="btn pri" id="scSave">Spremi trenutno stanje</button></div>
   <div class="row" style="margin-top:8px"><button class="btn" id="scDel">Obriši scenu</button><button class="btn" id="scClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="nd">
+  <div class="grip"></div>
+  <div class="shh"><div><small>Jedan tap pali ili gasi</small><strong>Noćno svjetlo</strong></div></div>
+  <label class="f">Prostorija<select id="nCtrl"></select></label>
+  <label class="f">Grupa<select id="nGroup"><option value="0">Cijela prostorija</option><option value="1">Grupa 1</option><option value="2">Grupa 2</option><option value="3">Grupa 3</option><option value="4">Grupa 4</option></select></label>
+  <label class="f">Jačina (%)<input type="number" id="nPct" min="1" max="100" inputmode="numeric"></label>
+  <div class="row"><button class="btn pri" id="nSave">Spremi</button><button class="btn" id="nClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="td">
+  <div class="grip"></div>
+  <div class="shh"><div><small>Sva svjetla se gase nakon</small><strong>Odgođeno gašenje</strong></div></div>
+  <div class="tg" id="tGrid"><button class="btn" data-m="5">5 min</button><button class="btn" data-m="10">10 min</button><button class="btn" data-m="15">15 min</button><button class="btn" data-m="30">30 min</button><button class="btn" data-m="45">45 min</button><button class="btn" data-m="60">60 min</button></div>
+  <p class="hint" style="margin:12px 0">Radi dok je aplikacija otvorena. Ekran može biti ugašen, ali aplikaciju nemoj zatvoriti.</p>
+  <div class="row"><button class="btn" id="tClose">Zatvori</button></div>
 </dialog>
 
 <dialog class="sh" id="setd">
   <div class="grip"></div>
   <div class="shh"><div><strong>Postavke</strong></div></div>
-  <button class="btn" id="bConn" style="width:100%;height:44px">Spoji sve kontrolere</button>
+  <button class="btn" id="bConn" style="width:100%">Spoji sve prostorije</button>
+  <div class="sec">Redoslijed prostorija</div><div class="ol" id="oCtrl"></div>
+  <div class="sec">Redoslijed scena</div><div class="ol" id="oScn"></div>
+  <div class="sec">Prijava</div>
   <label class="chk"><input type="checkbox" id="optUser"> Prijava kao korisnik (umjesto administratora)</label>
-  <button class="btn" id="bForget" style="width:100%;height:44px;margin-bottom:12px">Zaboravi spremljene lozinke i tokene</button>
-  <div style="font-size:13px;color:var(--mut);margin-bottom:6px">Dnevnik</div>
+  <button class="btn" id="bForget" style="width:100%">Zaboravi spremljene lozinke i tokene</button>
+  <div class="sec">Dnevnik</div>
   <div id="log"></div>
   <div class="row" style="margin-top:12px"><button class="btn" id="setClose">Zatvori</button></div>
 </dialog>
@@ -132,7 +175,6 @@ input[type=text],input[type=password]{height:44px;border-radius:10px;border:1px 
 
 <script>
 {
-
 const UUID={
   light:'bc183193-fceb-4838-904b-e78a6252739a',
   cmd:'3afd53a0-7d7e-11e5-9a46-0002a5d5c51b',
@@ -272,115 +314,131 @@ class Ctrl{
   forget(){try{this.dev&&this.dev.gatt.disconnect()}catch{}const ids=store.get('ids',[]).filter(i=>i!==this.id);store.set('ids',ids);ctrls.delete(this.id);try{this.dev&&this.dev.forget&&this.dev.forget()}catch{}render()}
 }
 const lv=v=>v>100?(v===255?0:100):v;
+
 function niceName(n){const i=n.search(/[_-]/);return (i>=0&&/^(Osbt|Invt|Ledv|Leye)/.test(n)?n.slice(i+1):n).trim()||n}
-
-
 const ctrls=new Map();
+const FILTERS=[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],OPT=[UUID.light,UUID.conf,UUID.ident];
 let pwResolve;
 function askPw(name){return new Promise(res=>{pwResolve=res;$('#dtxt').textContent='Kontroler „'+name+'“ traži lozinku koju si postavio u BT Config aplikaciji.';$('#dpw').value='';$('#dlg').showModal()})}
-$('#dlg').addEventListener('close',()=>{const ok=$('#dlg').returnValue==='ok';const v=$('#dpw').value;for(const c of ctrls.values())c._save=$('#dsave').checked;pwResolve&&pwResolve(ok?v:null);pwResolve=null});
+$('#dlg').addEventListener('close',()=>{const ok=$('#dlg').returnValue==='ok';pwResolve&&pwResolve(ok?$('#dpw').value:null);pwResolve=null});
 
 const gName=(c,g)=>store.get('gname_'+c.id+'_'+g,'Grupa '+g);
 const gState=(c,g)=>c.groups?c.groups[g-1]:null;
+const warmColor=p=>p<=0?'#3a322b':p<25?'#a0692e':p<60?'#e0804a':p<85?'#ffb547':'#ffe0a0';
 
 /* tap vs long press */
 function press(el,onTap,onLong){
-  let t=null,long=false;
-  el.addEventListener('pointerdown',e=>{long=false;el.classList.add('press');t=setTimeout(()=>{long=true;t=null;el.classList.remove('press');navigator.vibrate&&navigator.vibrate(15);onLong()},450)});
+  let t=null,long=false,sx=0,sy=0;
+  el.addEventListener('pointerdown',e=>{long=false;sx=e.clientX;sy=e.clientY;el.classList.add('press');t=setTimeout(()=>{long=true;t=null;el.classList.remove('press');navigator.vibrate&&navigator.vibrate(15);onLong()},450)});
   const end=()=>{el.classList.remove('press');if(t){clearTimeout(t);t=null}};
+  el.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-sx,e.clientY-sy)>12)end()});
   el.addEventListener('pointerup',()=>{const was=!!t;end();if(was&&!long)onTap()});
   el.addEventListener('pointerleave',end);el.addEventListener('pointercancel',end);
   el.addEventListener('contextmenu',e=>e.preventDefault());
   el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.shiftKey?onLong():onTap()}});
 }
 
+/* ---------- header ---------- */
+const DAYS=['Nedjelja','Ponedjeljak','Utorak','Srijeda','Četvrtak','Petak','Subota'];
+function tick(){const d=new Date(),h=d.getHours();
+  $('#now').textContent=DAYS[d.getDay()]+', '+String(h).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  $('#greet').textContent=h<5?'Laku noć':h<11?'Dobro jutro':h<18?'Dobar dan':h<22?'Dobra večer':'Laku noć';
+  timerTick()}
+function counts(){let on=0,all=0;for(const c of ctrls.values()){if(c.groups&&c.fmt==='ext'){all+=4;on+=c.groups.filter(g=>g.on).length}else{all++;if(c.on)on++}}return {on,all}}
+
+/* ---------- cards ---------- */
 function card(c){
   const el=document.createElement('div');el.className='card';el.id='c_'+c.id;
-  el.innerHTML='<div class="top"><span class="dot"></span><button class="nm"></button><span class="pc"></span><button class="sw" aria-label="Upali ili ugasi cijeli kontroler"></button></div><div class="st"></div><div class="gr">'+
-    [1,2,3,4].map(g=>'<button class="ch" data-g="'+g+'"><span></span><b></b></button>').join('')+'</div>';
+  el.innerHTML='<div class="top"><span class="dot"></span><button class="nm"></button><span class="pc"></span><button class="sw" aria-label="Upali ili ugasi cijelu prostoriju"></button></div><div class="st"></div><div class="gr">'+
+    [1,2,3,4].map(g=>'<button class="ch" data-g="'+g+'"><span class="fill"></span><span class="tx"><span></span><b></b></span></button>').join('')+'</div>';
   el.querySelector('.sw').onclick=()=>{if(!c.dev)return relink(c);c.setOn(!c.on).catch(()=>{})};
-  press(el.querySelector('.nm'),()=>{if(!c.dev)relink(c);else if(c.state!=='ok')c.run(()=>c.connect()).catch(()=>{});else openSheet(c,0)},()=>openSheet(c,0));
+  press(el.querySelector('.nm'),()=>{if(!c.dev)relink(c);else if(c.state!=='ok')auto(c);else openSheet(c,0)},()=>openSheet(c,0));
   el.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g;
     press(b,()=>{if(!c.dev)return relink(c);const s=gState(c,g);c.setGroupOn(g,!(s&&s.on)).catch(()=>{})},()=>openSheet(c,g))});
   return el;
 }
 function render(){
   const L=$('#list');
-  for(const el of [...L.children])if(!ctrls.has(el.id.slice(2)))el.remove();
-  if(!ctrls.size&&!L.querySelector('.hint0'))L.innerHTML='<p class="hint hint0" style="margin:0 4px">Još nema kontrolera. Tapni <b>+ Dodaj kontroler</b> i odaberi jedan od Osram uređaja, pa ponovi za sva četiri.</p>';
-  if(ctrls.size)L.querySelector('.hint0')?.remove();
+  for(const el of [...L.children])if(el.id&&!ctrls.has(el.id.slice(2)))el.remove();
+  if(!ctrls.size){if(!L.querySelector('.hint'))L.innerHTML='<p class="hint" style="margin:0 4px">Još nema prostorija. Tapni <b>+ Dodaj kontroler</b> i odaberi jedan od Osram uređaja, pa ponovi za sve.</p>'}
+  else L.querySelector('.hint')?.remove();
+  let mx=0;
   for(const c of ctrls.values()){
-    let el=document.getElementById('c_'+c.id);if(!el){el=card(c);L.appendChild(el)}
+    let el=document.getElementById('c_'+c.id);if(!el)el=card(c);L.appendChild(el);
+    const lvl=c.groups&&c.fmt==='ext'?Math.max(0,...c.groups.filter(g=>g.on).map(g=>g.pct)):(c.on?c.pct:0);
     el.classList.toggle('on',c.on);
+    el.style.background=c.on?'linear-gradient(135deg,rgba(255,170,60,'+(0.08+lvl/100*0.22).toFixed(2)+') 0%,#1c1715 70%)':'';
     el.querySelector('.dot').className='dot '+(c.state==='ok'?'ok':c.state==='busy'?'busy':c.state==='err'?'err':'');
     el.querySelector('.nm').textContent=c.name;
-    el.querySelector('.pc').textContent=c.on?c.pct+'%':'';
+    el.querySelector('.pc').textContent=c.on?(lvl||c.pct)+'%':'Ugašeno';
     el.querySelector('.sw').setAttribute('aria-pressed',c.on);
-    const st=el.querySelector('.st');const showSt=c.state!=='ok';st.style.display=showSt?'':'none';
+    const st=el.querySelector('.st');st.style.display=c.state!=='ok'?'':'none';
     st.textContent=!c.dev?'Tapni naziv za povezivanje':c.state==='idle'?c.msg+' · tapni naziv za spajanje':c.msg;st.classList.toggle('err',c.state==='err');
     const gr=el.querySelector('.gr');gr.style.display=c.fmt==='ext'?'':'none';
-    gr.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g,s=gState(c,g);
-      b.querySelector('span').textContent=gName(c,g);b.querySelector('b').textContent=s?(s.on?s.pct+'%':'off'):'–';
-      b.classList.toggle('on',!!(s&&s.on));b.setAttribute('aria-label',gName(c,g)+', '+(s&&s.on?s.pct+' posto':'ugašeno'))});
+    gr.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g,s=gState(c,g),on=!!(s&&s.on);
+      b.querySelector('.tx span').textContent=gName(c,g);b.querySelector('b').textContent=s?(on?s.pct+'%':'off'):'–';
+      b.querySelector('.fill').style.height=on?Math.max(8,s.pct)+'%':'0';
+      b.classList.toggle('on',on);b.setAttribute('aria-label',gName(c,g)+', '+(on?s.pct+' posto':'ugašeno'))});
+    if(c.on)mx=1;
   }
+  const n=counts();$('#cnt').textContent=ctrls.size?(n.on?'Upaljeno '+n.on+' od '+n.all+' svjetala':'Sve je ugašeno'):'';
+  $('#bPower').classList.toggle('off',!mx);
   if(cur)fillSheet();
+  markNight();
 }
 
-/* bottom sheet: g=0 whole controller, 1-4 group */
-let cur=null,slTimer;
+/* ---------- dial sheet: g=0 whole room, 1-4 group ---------- */
+let cur=null,slTimer,dval=0,dragging=false;
+const DC=120,DR=96,A0=135,SW=270;
+const pt=a=>[DC+DR*Math.cos(a*Math.PI/180),DC+DR*Math.sin(a*Math.PI/180)];
+{const [x0,y0]=pt(A0),[x1,y1]=pt(A0+SW),d='M'+x0+' '+y0+' A'+DR+' '+DR+' 0 1 1 '+x1+' '+y1;$('#dTrack').setAttribute('d',d);$('#dArc').setAttribute('d',d)}
+function setDial(v){dval=Math.max(0,Math.min(100,Math.round(v)));$('#dArc').setAttribute('stroke-dasharray',dval+' 100');$('#dArc').style.display=dval?'':'none';
+  const [x,y]=pt(A0+SW*dval/100);for(const k of ['#dKnob','#dKnob2']){$(k).setAttribute('cx',x);$(k).setAttribute('cy',y)}
+  $('#sOut').innerHTML=dval+'<small>%</small>';$('#dial').setAttribute('aria-valuenow',dval);
+  document.querySelectorAll('#pre button').forEach(b=>b.classList.toggle('cur',+b.dataset.p===dval))}
+const apply=p=>{const {c,g}=cur;(g?c.setGroupPct(g,p):c.setPct(p)).catch(()=>{})};
+function sendDial(){clearTimeout(slTimer);slTimer=setTimeout(()=>apply(dval),150)}
+function angOf(e){const r=$('#dial').getBoundingClientRect();const x=(e.clientX-r.left)/r.width*240-DC,y=(e.clientY-r.top)/r.height*240-DC;return (Math.atan2(y,x)*180/Math.PI-A0+720)%360}
+$('#dial').addEventListener('pointerdown',e=>{dragging=true;$('#dial').setPointerCapture(e.pointerId);const a=angOf(e);if(a<=SW){setDial(a/SW*100);sendDial()}});
+$('#dial').addEventListener('pointermove',e=>{if(!dragging)return;let a=angOf(e);if(a>SW)a=a>SW+(360-SW)/2?0:SW;const v=a/SW*100;if(Math.abs(v-dval)>60)return;setDial(v);sendDial()});
+const dEnd=()=>{dragging=false};$('#dial').addEventListener('pointerup',dEnd);$('#dial').addEventListener('pointercancel',dEnd);
+$('#dial').addEventListener('keydown',e=>{const k={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1,PageUp:10,PageDown:-10}[e.key];if(k){e.preventDefault();setDial(dval+k);sendDial()}});
+$('#dMinus').onclick=()=>{setDial(dval-1);sendDial()};$('#dPlus').onclick=()=>{setDial(dval+1);sendDial()};
+document.querySelectorAll('#pre button').forEach(b=>b.onclick=()=>{setDial(+b.dataset.p);clearTimeout(slTimer);apply(+b.dataset.p)});
 function openSheet(c,g){cur={c,g};fillSheet(true);$('#sheet').showModal()}
 function fillSheet(first){
   const {c,g}=cur;if(!ctrls.has(c.id)){$('#sheet').close();return}
   const s=g?gState(c,g):{on:c.on,pct:c.pct};const on=!!(s&&s.on),p=s&&s.on?s.pct:0;
-  $('#sSub').textContent=g?c.name:'Cijeli kontroler';$('#sTitle').textContent=g?gName(c,g):c.name;
-  $('#sSw').setAttribute('aria-pressed',on);
-  if(!dragging)setDial(p);
+  $('#sSub').textContent=g?c.name:'Cijela prostorija';$('#sTitle').textContent=g?gName(c,g):c.name;
+  $('#sSw').setAttribute('aria-pressed',on);if(!dragging)setDial(p);
   $('#sNameL').style.display=g?'':'none';if(first)$('#sName').value=g?gName(c,g):'';
   $('#sCtrlBtns').style.display=g?'none':'';
 }
-const apply=p=>{const {c,g}=cur;(g?c.setGroupPct(g,p):c.setPct(p)).catch(()=>{})};
-/* circular dial: 270° sweep from bottom-left, clockwise */
-const DC=120,DR=96,A0=135,SW=270;let dval=0,dragging=false;
-const pt=a=>[DC+DR*Math.cos(a*Math.PI/180),DC+DR*Math.sin(a*Math.PI/180)];
-{const [x0,y0]=pt(A0),[x1,y1]=pt(A0+SW),d='M'+x0+' '+y0+' A'+DR+' '+DR+' 0 1 1 '+x1+' '+y1;$('#dTrack').setAttribute('d',d);$('#dArc').setAttribute('d',d)}
-function setDial(v){dval=Math.max(0,Math.min(100,Math.round(v)));$('#dArc').setAttribute('stroke-dasharray',dval+' 100');$('#dArc').style.display=dval?'':'none';
-  const [x,y]=pt(A0+SW*dval/100);$('#dKnob').setAttribute('cx',x);$('#dKnob').setAttribute('cy',y);$('#sOut').textContent=dval+'%';$('#dial').setAttribute('aria-valuenow',dval)}
-function sendDial(){clearTimeout(slTimer);slTimer=setTimeout(()=>apply(dval),150)}
-function fromPointer(e){const r=$('#dial').getBoundingClientRect();const x=(e.clientX-r.left)/r.width*240-DC,y=(e.clientY-r.top)/r.height*240-DC;
-  let a=(Math.atan2(y,x)*180/Math.PI-A0+720)%360;if(a>SW)a=a>SW+(360-SW)/2?0:SW;
-  let v=a/SW*100;if(Math.abs(v-dval)>60)return;setDial(v);sendDial()}
-$('#dial').addEventListener('pointerdown',e=>{dragging=true;$('#dial').setPointerCapture(e.pointerId);const r=$('#dial').getBoundingClientRect();
-  const x=(e.clientX-r.left)/r.width*240-DC,y=(e.clientY-r.top)/r.height*240-DC;let a=(Math.atan2(y,x)*180/Math.PI-A0+720)%360;if(a<=SW){setDial(a/SW*100);sendDial()}});
-$('#dial').addEventListener('pointermove',e=>{if(dragging)fromPointer(e)});
-const dEnd=()=>{dragging=false};$('#dial').addEventListener('pointerup',dEnd);$('#dial').addEventListener('pointercancel',dEnd);
-$('#dial').addEventListener('keydown',e=>{const k={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1,PageUp:10,PageDown:-10}[e.key];if(k){e.preventDefault();setDial(dval+k);sendDial()}});
-$('#dMinus').onclick=()=>{setDial(dval-1);sendDial()};$('#dPlus').onclick=()=>{setDial(dval+1);sendDial()};
-document.querySelectorAll('#sheet .pre button').forEach(b=>b.onclick=()=>{setDial(+b.dataset.p);clearTimeout(slTimer);apply(+b.dataset.p)});
 $('#sSw').onclick=()=>{const {c,g}=cur;const on=$('#sSw').getAttribute('aria-pressed')==='true';(g?c.setGroupOn(g,!on):c.setOn(!on)).catch(()=>{})};
 $('#sName').addEventListener('change',()=>{const {c,g}=cur;if(g){store.set('gname_'+c.id+'_'+g,$('#sName').value.trim()||'Grupa '+g);render()}});
-$('#sConn').onclick=()=>{const {c}=cur;try{c.dev.gatt.disconnect()}catch{}c.chars=null;c.run(()=>c.connect()).catch(()=>{})};
+$('#sConn').onclick=()=>{const {c}=cur;try{c.dev&&c.dev.gatt.disconnect()}catch{}c.chars=null;c.dev?auto(c):relink(c)};
 $('#sPw').onclick=async()=>{const {c}=cur;$('#sheet').close();const pw=await askPw(c.name);if(pw!=null){store.set('pw_'+c.id,pw);store.set('tok_'+c.id+'_1',null);store.set('tok_'+c.id+'_2',null);log(c.name,'lozinka spremljena')}};
 $('#sDel').onclick=()=>{const {c}=cur;$('#sheet').close();c.forget()};
 $('#sClose').onclick=()=>$('#sheet').close();
 $('#sheet').addEventListener('close',()=>{cur=null});
-for(const d of ['#sheet','#setd'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
+for(const d of ['#sheet','#setd','#scd','#nd','#td'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
 
-const FILTERS=[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],OPT=[UUID.light,UUID.conf,UUID.ident];
+/* ---------- connecting ---------- */
 function saveIds(){store.set('ids',[...ctrls.keys()])}
 function addDev(dev){if(ctrls.has(dev.id)){const c=ctrls.get(dev.id);if(!c.dev)c.attach(dev);return c}const c=new Ctrl(dev);ctrls.set(dev.id,c);saveIds();render();return c}
-/* auto-connect: direct, or when the controller is next heard advertising */
 function auto(c){c.run(()=>c.connect()).catch(()=>{
   if(c.dev&&c.dev.watchAdvertisements&&!c.watching){c.watching=true;
-    c.dev.addEventListener('advertisementreceived',()=>{if(c.state==='ok')return;c.run(()=>c.connect()).catch(()=>{})});
-    c.dev.watchAdvertisements().then(()=>log(c.name,'čekam signal kontrolera…')).catch(e=>{c.watching=false;log(c.name,'watch',e.message)})}
+    c.dev.addEventListener('advertisementreceived',()=>{if(c.state==='ok'||c.state==='busy')return;c.run(()=>c.connect()).catch(()=>{})});
+    c.dev.watchAdvertisements().then(()=>log(c.name,'čekam signal…')).catch(e=>{c.watching=false;log(c.name,'watch',e.message)})}
 })}
-/* reconnect a remembered controller: chooser shows only that one */
 async function relink(c){
   try{const dev=await navigator.bluetooth.requestDevice({filters:FILTERS,optionalServices:OPT});
     const ex=ctrls.get(dev.id);
     if(ex){ex.attach(dev);auto(ex);if(ex!==c)log('Odabran je',ex.name,'– za',c.name,'tapni njegov naziv i odaberi njega');return}
     const byName=[...ctrls.values()].find(x=>!x.dev&&x.full===dev.name);if(byName)c=byName;
     try{for(const k of Object.keys(localStorage))if(k.startsWith('svj_')&&k.includes(c.id))localStorage.setItem(k.split(c.id).join(dev.id),localStorage.getItem(k))}catch{}
+    for(const sc of scenes)if(sc.items[c.id]){sc.items[dev.id]=sc.items[c.id];delete sc.items[c.id]}store.set('scenes',scenes);
+    const nl=store.get('night',null);if(nl&&nl.cid===c.id){nl.cid=dev.id;store.set('night',nl)}
     const m=[...ctrls.entries()].map(([k,v])=>k===c.id?[dev.id,v]:[k,v]);ctrls.clear();m.forEach(([k,v])=>ctrls.set(k,v));
     document.getElementById('c_'+c.id)?.remove();c.id=dev.id;saveIds();
     c.attach(dev);auto(c);
@@ -390,60 +448,103 @@ $('#bAdd').onclick=async()=>{
   try{const dev=await navigator.bluetooth.requestDevice({filters:FILTERS,optionalServices:OPT});auto(addDev(dev))}
   catch(e){if(e.name!=='NotFoundError')log('Dodavanje',e.message)}
 };
+$('#bPower').onclick=()=>{const anyOn=[...ctrls.values()].some(c=>c.on);for(const c of ctrls.values())if(c.dev)c.setOn(!anyOn).catch(()=>{})};
+
 /* ---------- scenes ---------- */
 let scenes=store.get('scenes',[]),editSc=null;
+function sceneLevel(sc){let s=0,n=0;for(const it of Object.values(sc.items)){if(it.groups)for(const g of it.groups){if(g.on){s+=g.pct;n++}}else if(it.on){s+=it.pct;n++}}return n?s/n:0}
 function renderScenes(){const box=$('#scenes');box.innerHTML='';
-  for(const sc of scenes){const b=document.createElement('button');b.className='sc';b.textContent=sc.name;b.id='sc_'+sc.id;box.appendChild(b);
+  const nb=document.createElement('button');nb.className='sc';nb.id='scNight';
+  nb.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc469" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Noćno</span>';
+  box.appendChild(nb);press(nb,nightToggle,openNight);
+  for(const sc of scenes){const b=document.createElement('button');b.className='sc';const col=warmColor(sceneLevel(sc));
+    b.innerHTML='<i style="background:'+col+';box-shadow:0 0 12px '+col+'"></i><span></span>';b.querySelector('span').textContent=sc.name;box.appendChild(b);
     press(b,()=>applyScene(sc,b),()=>openScene(sc))}
-  const n=document.createElement('button');n.className='sc new';n.textContent='+ Scena';n.onclick=()=>openScene(null);box.appendChild(n)}
+  const n=document.createElement('button');n.className='sc new';n.innerHTML='<span style="font-size:20px;line-height:1">+</span><span>Scena</span>';n.onclick=()=>openScene(null);box.appendChild(n);
+  markNight()}
 async function applyScene(sc,b){b.classList.add('run');log('Scena',sc.name);
-  const jobs=Object.entries(sc.items).map(([cid,it])=>{const c=ctrls.get(cid);
-    if(!c||!c.dev){log('Scena',sc.name,'preskače',c?c.name:'nepoznat kontroler','(nije povezan)');return null}
-    return c.applyScene(it).catch(e=>log(c.name,'scena',e.message))});
-  await Promise.all(jobs);b.classList.remove('run')}
+  await Promise.all(Object.entries(sc.items).map(([cid,it])=>{const c=ctrls.get(cid);
+    if(!c||!c.dev){log('Scena',sc.name,'preskače',c?c.name:'nepoznatu prostoriju');return null}
+    return c.applyScene(it).catch(e=>log(c.name,'scena',e.message))}));
+  b.classList.remove('run')}
 function openScene(sc){editSc=sc;$('#scTitle').textContent=sc?'Uredi scenu':'Nova scena';$('#scName').value=sc?sc.name:'';
-  $('#scDel').style.display=sc?'':'none';$('#scSave').textContent=sc?'Spremi trenutno stanje u ovu scenu':'Spremi trenutno stanje';
+  $('#scDel').style.display=sc?'':'none';$('#scSave').textContent=sc?'Spremi trenutno stanje u scenu':'Spremi trenutno stanje';
   const L=$('#scList');L.innerHTML='';
-  for(const c of ctrls.values()){const lab=document.createElement('label');lab.className='ci';
-    const inSc=sc?!!sc.items[c.id]:c.state==='ok';
-    lab.innerHTML='<input type="checkbox"><span></span><small></small>';const cb=lab.querySelector('input');cb.checked=inSc;cb.dataset.id=c.id;
-    lab.querySelector('span').textContent=c.name;lab.querySelector('small').textContent=c.state==='ok'?(c.on?'upaljeno':'ugašeno'):'nije spojen';
-    L.appendChild(lab)}
+  for(const c of ctrls.values()){const lab=document.createElement('label');lab.className='oi';
+    lab.innerHTML='<input type="checkbox"><span></span><small></small>';const cb=lab.querySelector('input');cb.checked=sc?!!sc.items[c.id]:c.state==='ok';cb.dataset.id=c.id;
+    lab.querySelector('span').textContent=c.name;lab.querySelector('small').textContent=c.state==='ok'?(c.on?'upaljeno':'ugašeno'):'nije spojen';L.appendChild(lab)}
   $('#scd').showModal()}
 $('#scSave').onclick=()=>{const name=$('#scName').value.trim();if(!name){$('#scName').focus();$('#scName').placeholder='Upiši naziv scene';return}
   const items={};
   for(const cb of $('#scList').querySelectorAll('input:checked')){const c=ctrls.get(cb.dataset.id);if(!c)continue;
     if(c.state!=='ok'&&editSc&&editSc.items[c.id]){items[c.id]=editSc.items[c.id];continue}
     items[c.id]={on:c.on,pct:c.pct||100,groups:c.groups&&c.fmt==='ext'?c.groups.map(g=>({on:g.on,pct:g.pct})):null}}
-  if(!Object.keys(items).length){log('Scena: odaberi barem jedan kontroler');return}
+  if(!Object.keys(items).length){log('Scena: odaberi barem jednu prostoriju');return}
   if(editSc){editSc.name=name;editSc.items=items}else scenes.push({id:Date.now().toString(36),name,items});
   store.set('scenes',scenes);renderScenes();$('#scd').close()};
 $('#scDel').onclick=()=>{if(!editSc)return;scenes=scenes.filter(x=>x!==editSc);store.set('scenes',scenes);renderScenes();$('#scd').close()};
 $('#scClose').onclick=()=>$('#scd').close();
-$('#scd').addEventListener('click',e=>{if(e.target===$('#scd'))$('#scd').close()});
-renderScenes();
 
-$('#bSet').onclick=()=>$('#setd').showModal();
+/* ---------- night light ---------- */
+function nightOn(){const n=store.get('night',null);if(!n)return false;const c=ctrls.get(n.cid);if(!c)return false;
+  if(+n.g){const s=gState(c,+n.g);return !!(s&&s.on&&s.pct===n.pct)}return c.on&&c.pct===n.pct}
+function markNight(){const b=document.getElementById('scNight');if(b)b.classList.toggle('act',nightOn())}
+function nightToggle(){const n=store.get('night',null);if(!n)return openNight();const c=ctrls.get(n.cid);
+  if(!c||!c.dev){if(c)relink(c);return}
+  const on=nightOn(),g=+n.g;
+  if(g)(on?c.setGroupOn(g,false):c.setGroupOn(g,true).then(()=>c.setGroupPct(g,n.pct))).catch(()=>{});
+  else (on?c.setOn(false):c.setOn(true).then(()=>c.setPct(n.pct))).catch(()=>{})}
+function openNight(){const n=store.get('night',{cid:[...ctrls.keys()][0],g:0,pct:5});
+  $('#nCtrl').innerHTML='';for(const c of ctrls.values()){const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$('#nCtrl').appendChild(o)}
+  $('#nCtrl').value=n.cid;$('#nGroup').value=n.g;$('#nPct').value=n.pct;nGroupNames();$('#nd').showModal()}
+function nGroupNames(){const c=ctrls.get($('#nCtrl').value);if(!c)return;for(let g=1;g<=4;g++)$('#nGroup').options[g].textContent=gName(c,g)}
+$('#nCtrl').onchange=nGroupNames;
+$('#nSave').onclick=()=>{if(!$('#nCtrl').value)return $('#nd').close();store.set('night',{cid:$('#nCtrl').value,g:+$('#nGroup').value,pct:Math.max(1,Math.min(100,+$('#nPct').value||5))});$('#nd').close();markNight()};
+$('#nClose').onclick=()=>$('#nd').close();
+
+/* ---------- sleep timer ---------- */
+let tEnd=store.get('timer',0);
+function timerTick(){const left=tEnd-Date.now();
+  if(tEnd&&left<=0){tEnd=0;store.set('timer',0);log('Odgođeno gašenje: gasim sve');for(const c of ctrls.values())if(c.dev)c.setOn(false).catch(()=>{})}
+  $('#tmr').style.display=tEnd?'flex':'none';$('#bTimer').classList.toggle('off',!tEnd);
+  if(tEnd){const s=Math.ceil(left/1000);$('#tmrLeft').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}}
+$('#bTimer').onclick=()=>$('#td').showModal();
+document.querySelectorAll('#tGrid button').forEach(b=>b.onclick=()=>{tEnd=Date.now()+b.dataset.m*60000;store.set('timer',tEnd);timerTick();$('#td').close()});
+$('#tmrCancel').onclick=()=>{tEnd=0;store.set('timer',0);timerTick()};
+$('#tClose').onclick=()=>$('#td').close();
+
+/* ---------- settings: order ---------- */
+function orderList(box,items,label,move){box.innerHTML='';
+  items.forEach((it,i)=>{const r=document.createElement('div');r.className='oi';r.innerHTML='<span></span><button aria-label="Gore">↑</button><button aria-label="Dolje">↓</button>';
+    r.querySelector('span').textContent=label(it);const [u,d]=r.querySelectorAll('button');u.disabled=i===0;d.disabled=i===items.length-1;
+    u.onclick=()=>move(i,-1);d.onclick=()=>move(i,1);box.appendChild(r)});
+  if(!items.length)box.innerHTML='<div class="oi"><small>Još ništa</small></div>'}
+function renderOrder(){
+  orderList($('#oCtrl'),[...ctrls.values()],c=>c.name,(i,d)=>{const e=[...ctrls.entries()];[e[i],e[i+d]]=[e[i+d],e[i]];ctrls.clear();e.forEach(([k,v])=>ctrls.set(k,v));saveIds();render();renderOrder()});
+  orderList($('#oScn'),scenes,s=>s.name,(i,d)=>{[scenes[i],scenes[i+d]]=[scenes[i+d],scenes[i]];store.set('scenes',scenes);renderScenes();renderOrder()})}
+$('#bSet').onclick=()=>{renderOrder();$('#setd').showModal()};
 $('#setClose').onclick=()=>$('#setd').close();
 $('#bConn').onclick=()=>{for(const c of ctrls.values())if(c.dev)auto(c)};
-$('#bAll1').onclick=()=>{for(const c of ctrls.values())if(c.dev)c.setOn(true).catch(()=>{})};
-$('#bAll0').onclick=()=>{for(const c of ctrls.values())if(c.dev)c.setOn(false).catch(()=>{})};
 $('#optUser').checked=store.get('user',false);
 $('#optUser').onchange=e=>store.set('user',e.target.checked);
 $('#bForget').onclick=()=>{try{Object.keys(localStorage).filter(k=>/^svj_(pw|tok)_/.test(k)).forEach(k=>localStorage.removeItem(k))}catch{}log('Lozinke i tokeni obrisani')};
 
+/* ---------- start ---------- */
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+tick();setInterval(tick,1000);
+renderScenes();
 (async()=>{
-  if(!navigator.bluetooth){$('#warn').innerHTML='<div class="warn">Ovaj preglednik ne podržava Web Bluetooth. Otvori stranicu u <b>Chromeu na Androidu</b>.</div>';['#bAdd','#bConn','#bAll1','#bAll0'].forEach(s=>$(s).disabled=true);render();return}
+  if(!navigator.bluetooth){$('#warn').innerHTML='<div class="warn">Ovaj preglednik ne podržava Web Bluetooth. Otvori stranicu u <b>Chromeu na Androidu</b>.</div>';render();return}
   for(const id of store.get('ids',[]))if(!ctrls.has(id))ctrls.set(id,new Ctrl(null,id));
   render();
   if(navigator.bluetooth.getDevices){
     try{const devs=await navigator.bluetooth.getDevices();let n=0;
       for(const d of devs){const c=ctrls.get(d.id);if(c){c.attach(d);auto(c);n++}}
-      log('Zapamćenih kontrolera:',ctrls.size,'· Chrome ih je vratio:',n);
-      if(ctrls.size&&!n)log('Uključi chrome://flags/#enable-web-bluetooth-new-permissions-backend da se kontroleri spajaju sami.');
+      log('Zapamćenih prostorija:',ctrls.size,'· Chrome ih je vratio:',n);
+      if(ctrls.size&&!n)log('Uključi chrome://flags/#enable-web-bluetooth-new-permissions-backend da se spajaju sami.');
     }catch(e){log('getDevices',e.message)}
-  }else log('getDevices nije dostupan: uključi chrome://flags/#enable-web-bluetooth-new-permissions-backend');
-  render();
+  }
+  renderScenes();
 })();
 }
 </script>
