@@ -6,86 +6,106 @@
 <meta name="theme-color" content="#14171c">
 <title>Svjetla doma</title>
 <style>
-:root{color-scheme:dark;--bg:#14171c;--card:#1d2229;--line:#2c333d;--ink:#eef0f3;--mut:#9aa3af;--warm:#ffb547;--ok:#4cc38a;--bad:#ef5f5f}
-*{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px max(4vw,14px) 40px}
-h1{font-size:26px;margin:4px 0 2px}
-.sub{color:var(--mut);font-size:14px;margin:0 0 16px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-button{font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+:root{color-scheme:dark;--bg:#14171c;--card:#1d2229;--line:#2c333d;--ink:#eef0f3;--mut:#9aa3af;--warm:#ffb547;--warm2:#ffd08a;--ok:#4cc38a;--bad:#ef5f5f}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px 12px 32px;max-width:560px;margin-inline:auto}
+button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
-button.pri{background:var(--warm);color:#1a1205;border-color:var(--warm);font-weight:600}
-button:disabled{opacity:.45}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;position:relative;overflow:hidden}
+.hd{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.hd h1{flex:1;margin:0;font-size:22px;font-weight:700}
+.btn{height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:13px}
+.btn.pri{background:var(--warm);border-color:var(--warm);color:#1a1205;font-weight:600}
+.icon{width:38px;padding:0;display:grid;place-items:center}
+#list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 12px}
 .card.on{border-color:#5a4520}
-.glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 80% at 85% 0%,rgba(255,181,71,var(--g,0)),transparent 60%);transition:opacity .3s}
-.top{display:flex;align-items:center;gap:10px;position:relative}
-.name{font-weight:650;font-size:18px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--mut);flex:none}
-.dot.ok{background:var(--ok)}.dot.busy{background:var(--warm)}.dot.err{background:var(--bad)}
-.st{font-size:13px;color:var(--mut);margin:4px 0 12px;position:relative;min-height:18px}
-.sw{width:64px;height:36px;border-radius:18px;padding:0;position:relative;flex:none}
-.sw::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--mut);transition:left .2s,background .2s}
-.sw[aria-pressed=true]{background:#4a3a1c;border-color:var(--warm)}
-.sw[aria-pressed=true]::after{left:32px;background:var(--warm)}
-.lvl{display:flex;align-items:center;gap:12px;position:relative}
-.pct{font-size:22px;font-weight:650;width:3.2em;text-align:right;font-variant-numeric:tabular-nums}
-input[type=range]{flex:1;height:44px;accent-color:var(--warm)}
-.pre{display:flex;gap:6px;margin-top:8px;position:relative}
-.pre button{flex:1;min-height:40px;padding:0 6px;font-size:14px}
-.act{display:flex;gap:6px;margin-top:10px;position:relative}
-.act button{min-height:36px;font-size:13px;padding:0 10px;color:var(--mut)}
-.grps{position:relative;margin-top:12px;border-top:1px solid var(--line);padding-top:6px}
-.grps summary{cursor:pointer;color:var(--mut);font-size:14px;min-height:36px;display:flex;align-items:center}
-.g{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
-.g:last-child{border-bottom:0}
-.g input[type=text]{margin:0;min-height:36px;background:transparent;border-color:transparent;padding:0 4px;font-weight:600}
-.g input[type=text]:focus{border-color:var(--line);background:var(--bg)}
-.g .lvl{grid-column:1/-1}.g .pct{font-size:16px}
-.g .sw{width:52px;height:30px}.g .sw::after{width:22px;height:22px}.g .sw[aria-pressed=true]::after{left:26px}
-.empty{border:1px dashed var(--line);border-radius:18px;padding:28px 18px;color:var(--mut);text-align:center}
-dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;max-width:420px;width:calc(100% - 32px)}
-dialog::backdrop{background:rgba(0,0,0,.6)}
-input[type=password],input[type=text]{font:inherit;width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;margin:10px 0}
-.row{display:flex;gap:8px;justify-content:flex-end}
-details{margin-top:24px;color:var(--mut);font-size:13px}
-#log{white-space:pre-wrap;font:12px/1.4 ui-monospace,monospace;max-height:320px;overflow:auto;background:#0d0f12;padding:10px;border-radius:10px}
-.warn{background:#3a2020;border:1px solid #6b3030;border-radius:12px;padding:12px;margin-bottom:14px;font-size:14px}
-label.chk{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:14px}
+.top{display:flex;align-items:center;gap:10px;min-height:32px}
+.dot{width:8px;height:8px;border-radius:50%;background:#4b535e;flex:none}
+.dot.ok{background:var(--ok)}.dot.busy{background:var(--warm);animation:p 1s infinite}.dot.err{background:var(--bad)}
+@keyframes p{50%{opacity:.3}}
+.nm{flex:1;font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;text-align:left;padding:6px 0}
+.pc{font-size:15px;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+.on .pc{color:var(--warm)}
+.sw{width:50px;height:30px;border-radius:15px;border:1px solid var(--line);background:var(--bg);position:relative;padding:0;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--mut);transition:left .18s,background .18s}
+.sw[aria-pressed=true]{background:#4a3a1c;border-color:var(--warm)}.sw[aria-pressed=true]::after{left:23px;background:var(--warm)}
+.st{font-size:12px;color:var(--mut);margin:-2px 0 4px 18px}
+.st.err{color:#f19090}
+.gr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.ch{height:50px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 4px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.ch span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch b{font-size:14px}
+.ch.on{background:#3a2e17;border-color:var(--warm);color:var(--warm2)}
+.ch.press{transform:scale(.96)}
+.add{width:100%;height:52px;border-radius:16px;border:1px dashed var(--line);background:none;color:var(--mut)}
+.hint{font-size:13px;color:var(--mut);margin:10px 4px 0}
+.warn{background:#3a2020;border:1px solid #6b3030;border-radius:12px;padding:12px;margin-bottom:12px;font-size:14px}
+dialog.sh{margin:auto 0 0;width:100%;max-width:100%;border:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;background:var(--card);color:var(--ink);padding:10px 18px 24px}
+dialog.sh::backdrop{background:rgba(0,0,0,.55)}
+@media(min-width:600px){dialog.sh{max-width:520px;margin:auto;border-radius:22px;border:1px solid var(--line)}}
+.grip{width:40px;height:4px;border-radius:2px;background:#3a424d;margin:0 auto 14px}
+.shh{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.shh div{flex:1}.shh small{display:block;font-size:13px;color:var(--mut)}.shh strong{font-size:20px}
+.sl{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sl input{flex:1;height:44px;accent-color:var(--warm)}
+.sl output{font-size:28px;font-weight:700;color:var(--warm);width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.pre{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pre button{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut);margin-bottom:12px}
+input[type=text],input[type=password]{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:0 12px;font:inherit;font-size:16px;width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row .btn{flex:1;height:44px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 12px}
+#log{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;max-height:40vh;overflow:auto;background:#0d0f12;padding:10px;border-radius:10px;color:var(--mut)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<h1>Svjetla doma</h1>
-<p class="sub">Svi DALI ECO BT kontroleri na jednom mjestu</p>
-<div id="warn"></div>
-<div class="bar">
-  <button class="pri" id="bAll1">Sve upali</button>
-  <button id="bAll0">Sve ugasi</button>
-  <button id="bConn">Spoji sve</button>
-  <button id="bAdd">+ Dodaj kontroler</button>
+<div class="hd">
+  <h1>Svjetla doma</h1>
+  <button class="btn pri" id="bAll1">Sve upali</button>
+  <button class="btn" id="bAll0">Sve ugasi</button>
+  <button class="btn icon" id="bSet" aria-label="Postavke"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
-<div class="grid" id="grid"></div>
+<div id="warn"></div>
+<div id="list"></div>
+<button class="add" id="bAdd" style="margin-top:10px">+ Dodaj kontroler</button>
+<p class="hint">Tap na grupu pali/gasi. Dugi pritisak na grupu ili naziv kontrolera otvara jačinu.</p>
 
-<dialog id="dlg">
-  <form method="dialog" id="dform">
-    <h3 style="margin:0 0 4px">Lozinka</h3>
+<dialog class="sh" id="sheet">
+  <div class="grip"></div>
+  <div class="shh"><div><small id="sSub"></small><strong id="sTitle"></strong></div><button class="sw" id="sSw" aria-label="Upali ili ugasi"></button></div>
+  <div class="sl"><input type="range" id="sRange" min="0" max="100" step="1" aria-label="Jačina svjetla"><output id="sOut">0%</output></div>
+  <div class="pre"><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="60">60%</button><button data-p="100">100%</button></div>
+  <label class="f" id="sNameL">Naziv grupe<input type="text" id="sName" autocomplete="off"></label>
+  <div class="row" id="sCtrlBtns"><button class="btn" id="sConn">Spoji ponovno</button><button class="btn" id="sPw">Lozinka</button><button class="btn" id="sDel">Ukloni</button></div>
+  <div class="row" style="margin-top:8px"><button class="btn" id="sClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="setd">
+  <div class="grip"></div>
+  <div class="shh"><div><strong>Postavke</strong></div></div>
+  <button class="btn" id="bConn" style="width:100%;height:44px">Spoji sve kontrolere</button>
+  <label class="chk"><input type="checkbox" id="optUser"> Prijava kao korisnik (umjesto administratora)</label>
+  <button class="btn" id="bForget" style="width:100%;height:44px;margin-bottom:12px">Zaboravi spremljene lozinke i tokene</button>
+  <div style="font-size:13px;color:var(--mut);margin-bottom:6px">Dnevnik</div>
+  <div id="log"></div>
+  <div class="row" style="margin-top:12px"><button class="btn" id="setClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="dlg">
+  <form method="dialog">
+    <div class="grip"></div>
+    <div class="shh"><div><strong>Lozinka</strong></div></div>
     <div id="dtxt" style="color:var(--mut);font-size:14px"></div>
-    <input type="password" id="dpw" autocomplete="current-password" placeholder="Lozinka kontrolera">
+    <input type="password" id="dpw" autocomplete="current-password" placeholder="Lozinka kontrolera" style="margin:12px 0 4px">
     <label class="chk"><input type="checkbox" id="dsave" checked> Zapamti na ovom mobitelu</label>
-    <div class="row"><button value="cancel" type="submit">Odustani</button><button class="pri" value="ok" type="submit">Prijava</button></div>
+    <div class="row"><button class="btn" value="cancel">Odustani</button><button class="btn pri" value="ok">Prijava</button></div>
   </form>
 </dialog>
 
-<details>
-  <summary>Postavke i dnevnik</summary>
-  <label class="chk"><input type="checkbox" id="optUser"> Prijava kao korisnik (umjesto administratora)</label>
-  <button id="bForget" style="margin:6px 0 10px">Zaboravi spremljene lozinke i tokene</button>
-  <div id="log"></div>
-</details>
-
 <script>
 {
+
 const UUID={
   light:'bc183193-fceb-4838-904b-e78a6252739a',
   cmd:'3afd53a0-7d7e-11e5-9a46-0002a5d5c51b',
@@ -211,57 +231,90 @@ class Ctrl{
 }
 function niceName(n){const i=n.search(/[_-]/);return (i>=0&&/^(Osbt|Invt|Ledv|Leye)/.test(n)?n.slice(i+1):n).trim()||n}
 
+
 const ctrls=new Map();
 let pwResolve;
 function askPw(name){return new Promise(res=>{pwResolve=res;$('#dtxt').textContent='Kontroler „'+name+'“ traži lozinku koju si postavio u BT Config aplikaciji.';$('#dpw').value='';$('#dlg').showModal()})}
 $('#dlg').addEventListener('close',()=>{const ok=$('#dlg').returnValue==='ok';const v=$('#dpw').value;for(const c of ctrls.values())c._save=$('#dsave').checked;pwResolve&&pwResolve(ok?v:null);pwResolve=null});
 
-function render(){
-  const g=$('#grid');
-  if(!ctrls.size){g.innerHTML='<div class="empty">Još nema kontrolera.<br>Tapni <b>+ Dodaj kontroler</b> i odaberi jedan od svojih Osram uređaja. Ponovi za sva četiri.</div>';return}
-  for(const c of ctrls.values()){
-    let el=document.getElementById('c_'+c.id);
-    if(!el){el=document.createElement('div');el.className='card';el.id='c_'+c.id;
-      el.innerHTML='<div class="glow"></div><div class="top"><span class="dot"></span><span class="name"></span><button class="sw" aria-label="Upali ili ugasi"></button></div><div class="st"></div><div class="lvl"><input type="range" min="0" max="100" step="1" aria-label="Razina svjetla"><span class="pct"></span></div><div class="pre"><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="60">60%</button><button data-p="100">100%</button></div><details class="grps" open><summary>Grupe</summary><div class="gl"></div></details><div class="act"><button data-a="conn">Spoji</button><button data-a="pw">Lozinka</button><button data-a="del">Ukloni</button></div>';
-      g.appendChild(el);
-      const r=el.querySelector('input');let tm;
-      r.addEventListener('input',()=>{el.querySelector('.pct').textContent=r.value+'%';clearTimeout(tm);tm=setTimeout(()=>c.setPct(+r.value).catch(()=>{}),180)});
-      el.querySelector('.sw').onclick=()=>c.setOn(!c.on).catch(()=>{});
-      el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>c.setPct(+b.dataset.p).catch(()=>{}));
-      el.querySelector('[data-a=conn]').onclick=()=>c.run(()=>c.connect()).catch(()=>{});
-      el.querySelector('[data-a=pw]').onclick=async()=>{const pw=await askPw(c.name);if(pw!=null){store.set('pw_'+c.id,pw);store.set('tok_'+c.id+'_1',null);store.set('tok_'+c.id+'_2',null);log(c.name,'lozinka spremljena')}};
-      el.querySelector('[data-a=del]').onclick=()=>{el.remove();c.forget()};
-      const gl=el.querySelector('.gl');
-      gl.innerHTML=[1,2,3,4].map(g=>'<div class="g" data-g="'+g+'"><input type="text" aria-label="Naziv grupe '+g+'"><button class="sw" aria-label="Upali ili ugasi grupu '+g+'"></button><div class="lvl"><input type="range" min="0" max="100" step="1" aria-label="Razina grupe '+g+'"><span class="pct"></span></div></div>').join('');
-      gl.querySelectorAll('.g').forEach(row=>{const g=+row.dataset.g,nm=row.querySelector('input[type=text]'),rr=row.querySelector('input[type=range]');let t2;
-        nm.value=store.get('gname_'+c.id+'_'+g,'Grupa '+g);nm.onchange=()=>store.set('gname_'+c.id+'_'+g,nm.value.trim()||'Grupa '+g);
-        row.querySelector('.sw').onclick=()=>c.setGroupOn(g,!(c.groups&&c.groups[g-1].on)).catch(()=>{});
-        rr.addEventListener('input',()=>{row.querySelector('.pct').textContent=rr.value+'%';clearTimeout(t2);t2=setTimeout(()=>c.setGroupPct(g,+rr.value).catch(()=>{}),180)});
-      });
-      const gd=el.querySelector('.grps');gd.open=store.get('gopen_'+c.id,true);gd.addEventListener('toggle',()=>store.set('gopen_'+c.id,gd.open));
-    }
-    const gd=el.querySelector('.grps');gd.style.display=c.fmt==='ext'?'':'none';
-    el.querySelectorAll('.g').forEach(row=>{const g=c.groups&&c.groups[+row.dataset.g-1],rr=row.querySelector('input[type=range]');
-      row.querySelector('.sw').setAttribute('aria-pressed',!!(g&&g.on));
-      if(document.activeElement!==rr){const v=g&&g.on?g.pct:0;rr.value=v;row.querySelector('.pct').textContent=g?v+'%':'–'}});
-    el.classList.toggle('on',c.on);
-    el.querySelector('.glow').style.setProperty('--g',c.on?(0.08+c.pct/100*0.32).toFixed(2):0);
-    el.querySelector('.dot').className='dot '+(c.state==='ok'?'ok':c.state==='busy'?'busy':c.state==='err'?'err':'');
-    el.querySelector('.name').textContent=c.name;
-    el.querySelector('.st').textContent=c.msg;
-    el.querySelector('.sw').setAttribute('aria-pressed',c.on);
-    const r=el.querySelector('input');if(document.activeElement!==r){r.value=c.on?c.pct:0;el.querySelector('.pct').textContent=(c.on?c.pct:0)+'%'}
-  }
-  g.querySelector('.empty')?.remove();
-}
-function addDev(dev){if(ctrls.has(dev.id))return ctrls.get(dev.id);const c=new Ctrl(dev);ctrls.set(dev.id,c);const ids=store.get('ids',[]);if(!ids.includes(dev.id)){ids.push(dev.id);store.set('ids',ids)}render();return c}
+const gName=(c,g)=>store.get('gname_'+c.id+'_'+g,'Grupa '+g);
+const gState=(c,g)=>c.groups?c.groups[g-1]:null;
 
+/* tap vs long press */
+function press(el,onTap,onLong){
+  let t=null,long=false;
+  el.addEventListener('pointerdown',e=>{long=false;el.classList.add('press');t=setTimeout(()=>{long=true;t=null;el.classList.remove('press');navigator.vibrate&&navigator.vibrate(15);onLong()},450)});
+  const end=()=>{el.classList.remove('press');if(t){clearTimeout(t);t=null}};
+  el.addEventListener('pointerup',()=>{const was=!!t;end();if(was&&!long)onTap()});
+  el.addEventListener('pointerleave',end);el.addEventListener('pointercancel',end);
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.shiftKey?onLong():onTap()}});
+}
+
+function card(c){
+  const el=document.createElement('div');el.className='card';el.id='c_'+c.id;
+  el.innerHTML='<div class="top"><span class="dot"></span><button class="nm"></button><span class="pc"></span><button class="sw" aria-label="Upali ili ugasi cijeli kontroler"></button></div><div class="st"></div><div class="gr">'+
+    [1,2,3,4].map(g=>'<button class="ch" data-g="'+g+'"><span></span><b></b></button>').join('')+'</div>';
+  el.querySelector('.sw').onclick=()=>c.setOn(!c.on).catch(()=>{});
+  press(el.querySelector('.nm'),()=>{if(c.state!=='ok')c.run(()=>c.connect()).catch(()=>{});else openSheet(c,0)},()=>openSheet(c,0));
+  el.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g;
+    press(b,()=>{const s=gState(c,g);c.setGroupOn(g,!(s&&s.on)).catch(()=>{})},()=>openSheet(c,g))});
+  return el;
+}
+function render(){
+  const L=$('#list');
+  for(const el of [...L.children])if(!ctrls.has(el.id.slice(2)))el.remove();
+  if(!ctrls.size&&!L.querySelector('.hint0'))L.innerHTML='<p class="hint hint0" style="margin:0 4px">Još nema kontrolera. Tapni <b>+ Dodaj kontroler</b> i odaberi jedan od Osram uređaja, pa ponovi za sva četiri.</p>';
+  if(ctrls.size)L.querySelector('.hint0')?.remove();
+  for(const c of ctrls.values()){
+    let el=document.getElementById('c_'+c.id);if(!el){el=card(c);L.appendChild(el)}
+    el.classList.toggle('on',c.on);
+    el.querySelector('.dot').className='dot '+(c.state==='ok'?'ok':c.state==='busy'?'busy':c.state==='err'?'err':'');
+    el.querySelector('.nm').textContent=c.name;
+    el.querySelector('.pc').textContent=c.on?c.pct+'%':'';
+    el.querySelector('.sw').setAttribute('aria-pressed',c.on);
+    const st=el.querySelector('.st');const showSt=c.state!=='ok';st.style.display=showSt?'':'none';
+    st.textContent=c.state==='idle'?c.msg+' · tapni naziv za spajanje':c.msg;st.classList.toggle('err',c.state==='err');
+    const gr=el.querySelector('.gr');gr.style.display=c.fmt==='ext'?'':'none';
+    gr.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g,s=gState(c,g);
+      b.querySelector('span').textContent=gName(c,g);b.querySelector('b').textContent=s?(s.on?s.pct+'%':'off'):'–';
+      b.classList.toggle('on',!!(s&&s.on));b.setAttribute('aria-label',gName(c,g)+', '+(s&&s.on?s.pct+' posto':'ugašeno'))});
+  }
+  if(cur)fillSheet();
+}
+
+/* bottom sheet: g=0 whole controller, 1-4 group */
+let cur=null,slTimer;
+function openSheet(c,g){cur={c,g};fillSheet(true);$('#sheet').showModal()}
+function fillSheet(first){
+  const {c,g}=cur;if(!ctrls.has(c.id)){$('#sheet').close();return}
+  const s=g?gState(c,g):{on:c.on,pct:c.pct};const on=!!(s&&s.on),p=s&&s.on?s.pct:0;
+  $('#sSub').textContent=g?c.name:'Cijeli kontroler';$('#sTitle').textContent=g?gName(c,g):c.name;
+  $('#sSw').setAttribute('aria-pressed',on);
+  if(document.activeElement!==$('#sRange')){$('#sRange').value=p;$('#sOut').textContent=p+'%'}
+  $('#sNameL').style.display=g?'':'none';if(first)$('#sName').value=g?gName(c,g):'';
+  $('#sCtrlBtns').style.display=g?'none':'';
+}
+const apply=p=>{const {c,g}=cur;(g?c.setGroupPct(g,p):c.setPct(p)).catch(()=>{})};
+$('#sRange').addEventListener('input',e=>{$('#sOut').textContent=e.target.value+'%';clearTimeout(slTimer);slTimer=setTimeout(()=>apply(+e.target.value),180)});
+document.querySelectorAll('#sheet .pre button').forEach(b=>b.onclick=()=>{$('#sRange').value=b.dataset.p;$('#sOut').textContent=b.dataset.p+'%';apply(+b.dataset.p)});
+$('#sSw').onclick=()=>{const {c,g}=cur;const on=$('#sSw').getAttribute('aria-pressed')==='true';(g?c.setGroupOn(g,!on):c.setOn(!on)).catch(()=>{})};
+$('#sName').addEventListener('change',()=>{const {c,g}=cur;if(g){store.set('gname_'+c.id+'_'+g,$('#sName').value.trim()||'Grupa '+g);render()}});
+$('#sConn').onclick=()=>{const {c}=cur;try{c.dev.gatt.disconnect()}catch{}c.chars=null;c.run(()=>c.connect()).catch(()=>{})};
+$('#sPw').onclick=async()=>{const {c}=cur;$('#sheet').close();const pw=await askPw(c.name);if(pw!=null){store.set('pw_'+c.id,pw);store.set('tok_'+c.id+'_1',null);store.set('tok_'+c.id+'_2',null);log(c.name,'lozinka spremljena')}};
+$('#sDel').onclick=()=>{const {c}=cur;$('#sheet').close();c.forget()};
+$('#sClose').onclick=()=>$('#sheet').close();
+$('#sheet').addEventListener('close',()=>{cur=null});
+for(const d of ['#sheet','#setd'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
+
+function addDev(dev){if(ctrls.has(dev.id))return ctrls.get(dev.id);const c=new Ctrl(dev);ctrls.set(dev.id,c);const ids=store.get('ids',[]);if(!ids.includes(dev.id)){ids.push(dev.id);store.set('ids',ids)}render();return c}
 $('#bAdd').onclick=async()=>{
-  try{
-    const dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],optionalServices:[UUID.light,UUID.conf,UUID.ident]});
+  try{const dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],optionalServices:[UUID.light,UUID.conf,UUID.ident]});
     const c=addDev(dev);c.run(()=>c.connect()).catch(()=>{});
   }catch(e){if(e.name!=='NotFoundError')log('Dodavanje',e.message)}
 };
+$('#bSet').onclick=()=>$('#setd').showModal();
+$('#setClose').onclick=()=>$('#setd').close();
 $('#bConn').onclick=()=>{for(const c of ctrls.values())c.run(()=>c.connect()).catch(()=>{})};
 $('#bAll1').onclick=()=>{for(const c of ctrls.values())c.setOn(true).catch(()=>{})};
 $('#bAll0').onclick=()=>{for(const c of ctrls.values())c.setOn(false).catch(()=>{})};
@@ -270,9 +323,10 @@ $('#optUser').onchange=e=>store.set('user',e.target.checked);
 $('#bForget').onclick=()=>{try{Object.keys(localStorage).filter(k=>/^svj_(pw|tok)_/.test(k)).forEach(k=>localStorage.removeItem(k))}catch{}log('Lozinke i tokeni obrisani')};
 
 (async()=>{
-  if(!navigator.bluetooth){$('#warn').innerHTML='<div class="warn">Ovaj preglednik ne podržava Web Bluetooth. Otvori stranicu u <b>Chromeu na Androidu</b>, preko https:// adrese ili localhosta.</div>';['#bAdd','#bConn','#bAll1','#bAll0'].forEach(s=>$(s).disabled=true);render();return}
+  if(!navigator.bluetooth){$('#warn').innerHTML='<div class="warn">Ovaj preglednik ne podržava Web Bluetooth. Otvori stranicu u <b>Chromeu na Androidu</b>.</div>';['#bAdd','#bConn','#bAll1','#bAll0'].forEach(s=>$(s).disabled=true);render();return}
   if(navigator.bluetooth.getDevices){
-    try{const devs=await navigator.bluetooth.getDevices();const ids=store.get('ids',[]);for(const d of devs)if(ids.includes(d.id))addDev(d);
+    try{const devs=await navigator.bluetooth.getDevices();const ids=store.get('ids',[]);
+      for(const id of ids){const d=devs.find(x=>x.id===id);if(d)addDev(d)}
       if(ctrls.size){log('Pronađeno spremljenih kontrolera:',ctrls.size);for(const c of ctrls.values())c.run(()=>c.connect()).catch(()=>{})}
     }catch(e){log('getDevices',e.message)}
   }else log('Preglednik ne pamti uređaje između posjeta; kontrolere dodaj ponovno nakon osvježavanja.');
