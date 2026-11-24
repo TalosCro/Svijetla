@@ -46,9 +46,21 @@ dialog.sh::backdrop{background:rgba(0,0,0,.55)}
 .grip{width:40px;height:4px;border-radius:2px;background:#3a424d;margin:0 auto 14px}
 .shh{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .shh div{flex:1}.shh small{display:block;font-size:13px;color:var(--mut)}.shh strong{font-size:20px}
-.sl{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.sl input{flex:1;height:44px;accent-color:var(--warm)}
-.sl output{font-size:28px;font-weight:700;color:var(--warm);width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.dial{position:relative;width:min(260px,72vw);aspect-ratio:1;margin:0 auto 4px;touch-action:none;user-select:none;-webkit-user-select:none}
+.dial svg{width:100%;height:100%;display:block;overflow:visible}
+.dial .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.dial .val b{font-size:46px;font-weight:700;color:var(--warm);font-variant-numeric:tabular-nums;line-height:1}
+.dial .val small{font-size:13px;color:var(--mut);margin-top:4px}
+.fine{display:flex;justify-content:center;gap:14px;margin:-34px 0 16px;position:relative}
+.fine button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:24px;line-height:1}
+.scn{display:flex;gap:8px;overflow-x:auto;margin:0 -12px 12px;padding:0 12px 2px;scrollbar-width:none}
+.scn::-webkit-scrollbar{display:none}
+.sc{flex:none;height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:600;white-space:nowrap;user-select:none;-webkit-user-select:none}
+.sc.new{border-style:dashed;color:var(--mut);font-weight:400}
+.sc.run{border-color:var(--warm);color:var(--warm2)}
+.ci{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.ci input{width:20px;height:20px;accent-color:var(--warm)}
+.ci small{color:var(--mut);margin-left:auto;font-size:12px}
 .pre{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
 .pre button{height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
 label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut);margin-bottom:12px}
@@ -67,18 +79,33 @@ input[type=text],input[type=password]{height:44px;border-radius:10px;border:1px 
   <button class="btn icon" id="bSet" aria-label="Postavke"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
 <div id="warn"></div>
+<div class="scn" id="scenes" aria-label="Scene"></div>
 <div id="list"></div>
 <button class="add" id="bAdd" style="margin-top:10px">+ Dodaj kontroler</button>
-<p class="hint">Tap na grupu pali/gasi. Dugi pritisak na grupu ili naziv kontrolera otvara jačinu.</p>
+<p class="hint">Tap na grupu pali/gasi. Dugi pritisak na grupu ili naziv kontrolera otvara jačinu. Dugi pritisak na scenu mijenja ili briše scenu.</p>
 
 <dialog class="sh" id="sheet">
   <div class="grip"></div>
   <div class="shh"><div><small id="sSub"></small><strong id="sTitle"></strong></div><button class="sw" id="sSw" aria-label="Upali ili ugasi"></button></div>
-  <div class="sl"><input type="range" id="sRange" min="0" max="100" step="1" aria-label="Jačina svjetla"><output id="sOut">0%</output></div>
+  <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Jačina svjetla" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <svg viewBox="0 0 240 240" aria-hidden="true"><path id="dTrack" fill="none" stroke="#2c333d" stroke-width="16" stroke-linecap="round"/><path id="dArc" pathLength="100" fill="none" stroke="#ffb547" stroke-width="16" stroke-linecap="round"/><circle id="dKnob" r="19" fill="#ffd08a" stroke="#14171c" stroke-width="5"/></svg>
+    <div class="val"><b id="sOut">0%</b><small>povuci po krugu</small></div>
+  </div>
+  <div class="fine"><button id="dMinus" aria-label="Smanji za 1%">−</button><button id="dPlus" aria-label="Povećaj za 1%">+</button></div>
   <div class="pre"><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="60">60%</button><button data-p="100">100%</button></div>
   <label class="f" id="sNameL">Naziv grupe<input type="text" id="sName" autocomplete="off"></label>
   <div class="row" id="sCtrlBtns"><button class="btn" id="sConn">Spoji ponovno</button><button class="btn" id="sPw">Lozinka</button><button class="btn" id="sDel">Ukloni</button></div>
   <div class="row" style="margin-top:8px"><button class="btn" id="sClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="scd">
+  <div class="grip"></div>
+  <div class="shh"><div><strong id="scTitle">Nova scena</strong></div></div>
+  <label class="f">Naziv scene<input type="text" id="scName" autocomplete="off" placeholder="npr. Večer, Film, Noćno"></label>
+  <div style="font-size:13px;color:var(--mut)">Spremi trenutno stanje ovih kontrolera:</div>
+  <div id="scList" style="margin-bottom:14px"></div>
+  <div class="row"><button class="btn pri" id="scSave">Spremi trenutno stanje</button></div>
+  <div class="row" style="margin-top:8px"><button class="btn" id="scDel">Obriši scenu</button><button class="btn" id="scClose">Zatvori</button></div>
 </dialog>
 
 <dialog class="sh" id="setd">
@@ -231,6 +258,17 @@ class Ctrl{
   setPct(p){return this.run(async()=>{await this.connect();
     await this.write(this.chars.lvl,new Uint8Array([p,0,0xff,0xff,1,0,0]),new Uint8Array([p,0,0xff,0xff]));
     if(p>0)this.pct=p;this.on=p>0;render();await sleep(200);await this.readGroups()})}
+  applyScene(it){return this.run(async()=>{await this.connect();
+    if(it.groups&&this.fmt==='ext'){
+      for(let g=1;g<=4;g++){const x=it.groups[g-1];
+        if(x.on&&x.pct>0){await this.chars.cmd.writeValueWithResponse(new Uint8Array([1,1,1,g]));await sleep(60);
+          await this.chars.lvl.writeValueWithResponse(new Uint8Array([x.pct,0,0xff,0xff,1,1,g]))}
+        else await this.chars.cmd.writeValueWithResponse(new Uint8Array([0,1,1,g]));
+        await sleep(60)}
+    }else if(it.on){await this.write(this.chars.cmd,new Uint8Array([1,1,0,0]),new Uint8Array([1]));await sleep(60);
+      if(it.pct>0)await this.write(this.chars.lvl,new Uint8Array([it.pct,0,0xff,0xff,1,0,0]),new Uint8Array([it.pct,0,0xff,0xff]))}
+    else await this.write(this.chars.cmd,new Uint8Array([0,1,0,0]),new Uint8Array([0]));
+    await sleep(200);await this.readState();render()})}
   forget(){try{this.dev&&this.dev.gatt.disconnect()}catch{}const ids=store.get('ids',[]).filter(i=>i!==this.id);store.set('ids',ids);ctrls.delete(this.id);try{this.dev&&this.dev.forget&&this.dev.forget()}catch{}render()}
 }
 const lv=v=>v>100?(v===255?0:100):v;
@@ -296,13 +334,28 @@ function fillSheet(first){
   const s=g?gState(c,g):{on:c.on,pct:c.pct};const on=!!(s&&s.on),p=s&&s.on?s.pct:0;
   $('#sSub').textContent=g?c.name:'Cijeli kontroler';$('#sTitle').textContent=g?gName(c,g):c.name;
   $('#sSw').setAttribute('aria-pressed',on);
-  if(document.activeElement!==$('#sRange')){$('#sRange').value=p;$('#sOut').textContent=p+'%'}
+  if(!dragging)setDial(p);
   $('#sNameL').style.display=g?'':'none';if(first)$('#sName').value=g?gName(c,g):'';
   $('#sCtrlBtns').style.display=g?'none':'';
 }
 const apply=p=>{const {c,g}=cur;(g?c.setGroupPct(g,p):c.setPct(p)).catch(()=>{})};
-$('#sRange').addEventListener('input',e=>{$('#sOut').textContent=e.target.value+'%';clearTimeout(slTimer);slTimer=setTimeout(()=>apply(+e.target.value),180)});
-document.querySelectorAll('#sheet .pre button').forEach(b=>b.onclick=()=>{$('#sRange').value=b.dataset.p;$('#sOut').textContent=b.dataset.p+'%';apply(+b.dataset.p)});
+/* circular dial: 270° sweep from bottom-left, clockwise */
+const DC=120,DR=96,A0=135,SW=270;let dval=0,dragging=false;
+const pt=a=>[DC+DR*Math.cos(a*Math.PI/180),DC+DR*Math.sin(a*Math.PI/180)];
+{const [x0,y0]=pt(A0),[x1,y1]=pt(A0+SW),d='M'+x0+' '+y0+' A'+DR+' '+DR+' 0 1 1 '+x1+' '+y1;$('#dTrack').setAttribute('d',d);$('#dArc').setAttribute('d',d)}
+function setDial(v){dval=Math.max(0,Math.min(100,Math.round(v)));$('#dArc').setAttribute('stroke-dasharray',dval+' 100');$('#dArc').style.display=dval?'':'none';
+  const [x,y]=pt(A0+SW*dval/100);$('#dKnob').setAttribute('cx',x);$('#dKnob').setAttribute('cy',y);$('#sOut').textContent=dval+'%';$('#dial').setAttribute('aria-valuenow',dval)}
+function sendDial(){clearTimeout(slTimer);slTimer=setTimeout(()=>apply(dval),150)}
+function fromPointer(e){const r=$('#dial').getBoundingClientRect();const x=(e.clientX-r.left)/r.width*240-DC,y=(e.clientY-r.top)/r.height*240-DC;
+  let a=(Math.atan2(y,x)*180/Math.PI-A0+720)%360;if(a>SW)a=a>SW+(360-SW)/2?0:SW;
+  let v=a/SW*100;if(Math.abs(v-dval)>60)return;setDial(v);sendDial()}
+$('#dial').addEventListener('pointerdown',e=>{dragging=true;$('#dial').setPointerCapture(e.pointerId);const r=$('#dial').getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*240-DC,y=(e.clientY-r.top)/r.height*240-DC;let a=(Math.atan2(y,x)*180/Math.PI-A0+720)%360;if(a<=SW){setDial(a/SW*100);sendDial()}});
+$('#dial').addEventListener('pointermove',e=>{if(dragging)fromPointer(e)});
+const dEnd=()=>{dragging=false};$('#dial').addEventListener('pointerup',dEnd);$('#dial').addEventListener('pointercancel',dEnd);
+$('#dial').addEventListener('keydown',e=>{const k={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1,PageUp:10,PageDown:-10}[e.key];if(k){e.preventDefault();setDial(dval+k);sendDial()}});
+$('#dMinus').onclick=()=>{setDial(dval-1);sendDial()};$('#dPlus').onclick=()=>{setDial(dval+1);sendDial()};
+document.querySelectorAll('#sheet .pre button').forEach(b=>b.onclick=()=>{setDial(+b.dataset.p);clearTimeout(slTimer);apply(+b.dataset.p)});
 $('#sSw').onclick=()=>{const {c,g}=cur;const on=$('#sSw').getAttribute('aria-pressed')==='true';(g?c.setGroupOn(g,!on):c.setOn(!on)).catch(()=>{})};
 $('#sName').addEventListener('change',()=>{const {c,g}=cur;if(g){store.set('gname_'+c.id+'_'+g,$('#sName').value.trim()||'Grupa '+g);render()}});
 $('#sConn').onclick=()=>{const {c}=cur;try{c.dev.gatt.disconnect()}catch{}c.chars=null;c.run(()=>c.connect()).catch(()=>{})};
@@ -323,12 +376,13 @@ function auto(c){c.run(()=>c.connect()).catch(()=>{
 })}
 /* reconnect a remembered controller: chooser shows only that one */
 async function relink(c){
-  try{const dev=await navigator.bluetooth.requestDevice({filters:[{name:c.full}],optionalServices:OPT});
-    if(dev.id!==c.id){
-      try{for(const k of Object.keys(localStorage))if(k.startsWith('svj_')&&k.includes(c.id))localStorage.setItem(k.split(c.id).join(dev.id),localStorage.getItem(k))}catch{}
-      const m=[...ctrls.entries()].map(([k,v])=>k===c.id?[dev.id,v]:[k,v]);ctrls.clear();m.forEach(([k,v])=>ctrls.set(k,v));
-      document.getElementById('c_'+c.id)?.remove();c.id=dev.id;saveIds();
-    }
+  try{const dev=await navigator.bluetooth.requestDevice({filters:FILTERS,optionalServices:OPT});
+    const ex=ctrls.get(dev.id);
+    if(ex){ex.attach(dev);auto(ex);if(ex!==c)log('Odabran je',ex.name,'– za',c.name,'tapni njegov naziv i odaberi njega');return}
+    const byName=[...ctrls.values()].find(x=>!x.dev&&x.full===dev.name);if(byName)c=byName;
+    try{for(const k of Object.keys(localStorage))if(k.startsWith('svj_')&&k.includes(c.id))localStorage.setItem(k.split(c.id).join(dev.id),localStorage.getItem(k))}catch{}
+    const m=[...ctrls.entries()].map(([k,v])=>k===c.id?[dev.id,v]:[k,v]);ctrls.clear();m.forEach(([k,v])=>ctrls.set(k,v));
+    document.getElementById('c_'+c.id)?.remove();c.id=dev.id;saveIds();
     c.attach(dev);auto(c);
   }catch(e){if(e.name!=='NotFoundError')log('Povezivanje',e.message)}
 }
@@ -336,6 +390,39 @@ $('#bAdd').onclick=async()=>{
   try{const dev=await navigator.bluetooth.requestDevice({filters:FILTERS,optionalServices:OPT});auto(addDev(dev))}
   catch(e){if(e.name!=='NotFoundError')log('Dodavanje',e.message)}
 };
+/* ---------- scenes ---------- */
+let scenes=store.get('scenes',[]),editSc=null;
+function renderScenes(){const box=$('#scenes');box.innerHTML='';
+  for(const sc of scenes){const b=document.createElement('button');b.className='sc';b.textContent=sc.name;b.id='sc_'+sc.id;box.appendChild(b);
+    press(b,()=>applyScene(sc,b),()=>openScene(sc))}
+  const n=document.createElement('button');n.className='sc new';n.textContent='+ Scena';n.onclick=()=>openScene(null);box.appendChild(n)}
+async function applyScene(sc,b){b.classList.add('run');log('Scena',sc.name);
+  const jobs=Object.entries(sc.items).map(([cid,it])=>{const c=ctrls.get(cid);
+    if(!c||!c.dev){log('Scena',sc.name,'preskače',c?c.name:'nepoznat kontroler','(nije povezan)');return null}
+    return c.applyScene(it).catch(e=>log(c.name,'scena',e.message))});
+  await Promise.all(jobs);b.classList.remove('run')}
+function openScene(sc){editSc=sc;$('#scTitle').textContent=sc?'Uredi scenu':'Nova scena';$('#scName').value=sc?sc.name:'';
+  $('#scDel').style.display=sc?'':'none';$('#scSave').textContent=sc?'Spremi trenutno stanje u ovu scenu':'Spremi trenutno stanje';
+  const L=$('#scList');L.innerHTML='';
+  for(const c of ctrls.values()){const lab=document.createElement('label');lab.className='ci';
+    const inSc=sc?!!sc.items[c.id]:c.state==='ok';
+    lab.innerHTML='<input type="checkbox"><span></span><small></small>';const cb=lab.querySelector('input');cb.checked=inSc;cb.dataset.id=c.id;
+    lab.querySelector('span').textContent=c.name;lab.querySelector('small').textContent=c.state==='ok'?(c.on?'upaljeno':'ugašeno'):'nije spojen';
+    L.appendChild(lab)}
+  $('#scd').showModal()}
+$('#scSave').onclick=()=>{const name=$('#scName').value.trim();if(!name){$('#scName').focus();$('#scName').placeholder='Upiši naziv scene';return}
+  const items={};
+  for(const cb of $('#scList').querySelectorAll('input:checked')){const c=ctrls.get(cb.dataset.id);if(!c)continue;
+    if(c.state!=='ok'&&editSc&&editSc.items[c.id]){items[c.id]=editSc.items[c.id];continue}
+    items[c.id]={on:c.on,pct:c.pct||100,groups:c.groups&&c.fmt==='ext'?c.groups.map(g=>({on:g.on,pct:g.pct})):null}}
+  if(!Object.keys(items).length){log('Scena: odaberi barem jedan kontroler');return}
+  if(editSc){editSc.name=name;editSc.items=items}else scenes.push({id:Date.now().toString(36),name,items});
+  store.set('scenes',scenes);renderScenes();$('#scd').close()};
+$('#scDel').onclick=()=>{if(!editSc)return;scenes=scenes.filter(x=>x!==editSc);store.set('scenes',scenes);renderScenes();$('#scd').close()};
+$('#scClose').onclick=()=>$('#scd').close();
+$('#scd').addEventListener('click',e=>{if(e.target===$('#scd'))$('#scd').close()});
+renderScenes();
+
 $('#bSet').onclick=()=>$('#setd').showModal();
 $('#setClose').onclick=()=>$('#setd').close();
 $('#bConn').onclick=()=>{for(const c of ctrls.values())if(c.dev)auto(c)};
