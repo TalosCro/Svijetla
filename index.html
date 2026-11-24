@@ -91,6 +91,9 @@ input[type=text],input[type=password],input[type=number],select{height:46px;bord
 .oi:last-child{border-bottom:0}.oi span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .oi button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line3);background:var(--deep)}
 .oi input{width:20px;height:20px;accent-color:var(--warm)}.oi small{color:var(--mut);font-size:12px}
+.pba{display:block;width:100%;margin:6px 0 2px;min-height:38px;border-radius:10px;border:1px solid var(--bad);background:transparent;color:var(--bad);font-size:13px;font-weight:700}
+.cp{border:1px solid var(--line0);border-radius:14px;padding:10px 12px;margin-bottom:8px}.cp h4{margin:0 0 6px;font-size:15px}.cp .ln{display:grid;grid-template-columns:62px minmax(0,1fr);gap:2px 8px;font-size:13px;padding:3px 0;border-top:1px solid var(--line0)}.cp .ln:first-of-type{border-top:0}.cp .ln b{color:var(--mut);font-weight:600}.cp code{font-size:11px;color:var(--dim);overflow-wrap:anywhere}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
 .tg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 #log{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;max-height:36vh;overflow:auto;background:var(--log);padding:10px;border-radius:12px;color:var(--mut)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -122,7 +125,7 @@ input[type=text],input[type=password],input[type=number],select{height:46px;bord
   <div class="fine"><button id="dMinus" aria-label="Smanji za 1%">−</button><button id="dPlus" aria-label="Povećaj za 1%">+</button></div>
   <div class="pre" id="pre"><button data-p="1">1%</button><button data-p="10">10%</button><button data-p="30">30%</button><button data-p="50">50%</button><button data-p="100">100%</button></div>
   <label class="f" id="sNameL">Naziv grupe<input type="text" id="sName" autocomplete="off"></label>
-  <div class="row" id="sCtrlBtns"><button class="btn" id="sConn">Spoji ponovno</button><button class="btn" id="sPw">Lozinka</button><button class="btn" id="sDel">Ukloni</button></div>
+  <div class="row" id="sCtrlBtns"><button class="btn" id="sConn">Spoji ponovno</button><button class="btn" id="sPb">Tipkala</button><button class="btn" id="sPw">Lozinka</button><button class="btn" id="sDel">Ukloni</button></div>
   <div class="row" style="margin-top:8px"><button class="btn" id="sClose">Zatvori</button></div>
 </dialog>
 
@@ -151,6 +154,21 @@ input[type=text],input[type=password],input[type=number],select{height:46px;bord
   <div class="tg" id="tGrid"><button class="btn" data-m="5">5 min</button><button class="btn" data-m="10">10 min</button><button class="btn" data-m="15">15 min</button><button class="btn" data-m="30">30 min</button><button class="btn" data-m="45">45 min</button><button class="btn" data-m="60">60 min</button></div>
   <p class="hint" style="margin:12px 0">Radi dok je aplikacija otvorena. Ekran može biti ugašen, ali aplikaciju nemoj zatvoriti.</p>
   <div class="row"><button class="btn" id="tClose">Zatvori</button></div>
+</dialog>
+
+<dialog class="sh" id="pbd">
+  <div class="grip"></div>
+  <div class="shh"><div><small id="pbSub"></small><strong>Tipkala</strong></div></div>
+  <div id="pbStatus" class="hint" style="margin:0 2px 12px">Čitam postavke…</div>
+  <label class="f">Ponašanje tipkala (Push Button Behaviour)<select id="pbBeh">
+    <option value="0">Upali / ugasi</option><option value="1">Upali / ugasi + dimanje</option><option value="2">Samo upali</option>
+    <option value="3">Upali / ugasi + dimanje + start/stop regulacije</option><option value="4">Upali / ugasi + dimanje, grupe 1 i 2</option><option value="5">Upali / ugasi + dimanje, grupe 1 i 2 + regulacija</option></select></label>
+  <div class="row" style="margin-bottom:6px"><button class="btn" id="pbBehSave">Spremi ponašanje</button></div>
+  <div class="sec">Coupleri tipkala</div>
+  <div id="pbList"></div>
+  <div class="row" style="margin-top:6px"><button class="btn pri" id="pbSnap">Spremi kao ispravno stanje</button><button class="btn" id="pbRestore">Vrati spremljeno</button></div>
+  <label class="chk"><input type="checkbox" id="pbAuto"> Automatski vrati ako se coupler resetira</label>
+  <div class="row"><button class="btn" id="pbReload">Pročitaj ponovno</button><button class="btn" id="pbClose">Zatvori</button></div>
 </dialog>
 
 <dialog class="sh" id="setd">
@@ -232,6 +250,7 @@ class Ctrl{
       this.set('busy','Prijava…');
       await this.auth();
       await this.readState();
+      await this.checkPb();
       try{await this.chars.lvl.startNotifications();this.chars.lvl.addEventListener('characteristicvaluechanged',e=>this.onLevel(new Uint8Array(e.target.value.buffer),true))}catch(e){log(this.name,'notify',e.message)}
       this.set('ok','Spojen');
     }catch(e){log(this.name,'GREŠKA',e.message);this.set('err',e.message.slice(0,80));try{this.dev.gatt.disconnect()}catch{}this.chars=null;throw e}
@@ -306,6 +325,51 @@ class Ctrl{
   setPct(p){return this.run(async()=>{await this.connect();
     await this.write(this.chars.lvl,new Uint8Array([p,0,0xff,0xff,1,0,0]),new Uint8Array([p,0,0xff,0xff]));
     if(p>0)this.pct=p;this.on=p>0;render();await sleep(200);await this.readGroups()})}
+  /* ---- configuration (topic 4 = configuration, 15 = devices) ---- */
+  async mediumWrite(topic,prop,data){
+    const pkt=new Uint8Array(20);pkt[0]=topic;pkt[1]=prop;pkt[2]=1;pkt.set(data.slice(0,17),3);
+    await this.chars.med.writeValueWithResponse(pkt);await sleep(60);
+    const t0=Date.now();
+    while(Date.now()-t0<3000){
+      const v=new Uint8Array((await this.chars.med.readValue()).buffer);
+      if(v[0]===topic&&v[1]===prop&&(v[2]&2)&&!(v[2]&4))return v.slice(3);
+      await sleep(70);
+    }
+    throw new Error('Kontroler nije potvrdio zapis');
+  }
+  async readPb(){
+    const page=await this.medium(4,0,new Uint8Array(17));log(this.name,'config stranica',toHex(page));
+    let caps=[];for(let p=41;p<=44;p++){try{caps.push(...(await this.medium(15,p,new Uint8Array(16))).slice(0,16))}catch(e){log(this.name,'caps',p,e.message)}}
+    log(this.name,'ulazni uređaji',toHex(caps));
+    const ids=[...new Set(caps.filter(b=>b>0).map(b=>b&15))];
+    const couplers=[];
+    for(const id of (ids.length?ids:[0,1,2,3])){
+      for(const prop of [42,41]){
+        try{const d=await this.medium(4,prop,new Uint8Array([id,...new Array(16).fill(0)]));
+          log(this.name,'coupler',id,'prop',prop,toHex(d.slice(0,17)));
+          if(d[0]===id&&d.slice(1,17).some(b=>b)){couplers.push({id,prop,data:[...d.slice(0,17)]});break}
+        }catch(e){log(this.name,'coupler',id,prop,e.message)}
+      }
+    }
+    this.pb={behaviour:page[6],couplers,at:Date.now()};return this.pb;
+  }
+  setPbBehaviour(v){return this.run(async()=>{await this.connect();
+    const page=await this.medium(4,0,new Uint8Array(17));page[6]=v;await this.mediumWrite(4,0,page);
+    const chk=await this.medium(4,0,new Uint8Array(17));if(chk[6]!==v)throw new Error('Ponašanje tipkala nije spremljeno');
+    if(this.pb)this.pb.behaviour=v;log(this.name,'ponašanje tipkala =',v)})}
+  restorePb(){return this.run(async()=>{await this.connect();const snap=store.get('pbsnap_'+this.id,null);if(!snap)throw new Error('Nema spremljenog stanja');
+    for(const cp of snap.couplers){
+      const cur=await this.medium(4,cp.prop,new Uint8Array([cp.id,...new Array(16).fill(0)]));
+      if(toHex(cur.slice(0,17))===toHex(cp.data)){continue}
+      log(this.name,'vraćam coupler',cp.id,toHex(cp.data));await this.mediumWrite(4,cp.prop,new Uint8Array(cp.data));await sleep(200)}
+    if(snap.behaviour!=null){const page=await this.medium(4,0,new Uint8Array(17));if(page[6]!==snap.behaviour){page[6]=snap.behaviour;await this.mediumWrite(4,0,page)}}
+    await this.readPb();this.pbAlert=false;render();log(this.name,'tipkala vraćena')})}
+  async checkPb(){const snap=store.get('pbsnap_'+this.id,null);if(!snap)return;
+    try{let bad=false;
+      for(const cp of snap.couplers){const cur=await this.medium(4,cp.prop,new Uint8Array([cp.id,...new Array(16).fill(0)]));if(toHex(cur.slice(0,17))!==toHex(cp.data)){bad=true;log(this.name,'coupler',cp.id,'promijenjen:',toHex(cur.slice(0,17)))}}
+      this.pbAlert=bad;render();
+      if(bad&&store.get('pbauto_'+this.id,false)){log(this.name,'automatski vraćam tipkala');setTimeout(()=>this.restorePb().catch(e=>log(this.name,'vraćanje',e.message)),300)}
+    }catch(e){log(this.name,'provjera tipkala',e.message)}}
   applyScene(it){return this.run(async()=>{await this.connect();
     if(it.groups&&this.fmt==='ext'){
       for(let g=1;g<=4;g++){const x=it.groups[g-1];
@@ -380,6 +444,8 @@ function render(){
     el.querySelector('.sw').setAttribute('aria-pressed',c.on);
     const st=el.querySelector('.st');st.style.display=c.state!=='ok'?'':'none';
     st.textContent=!c.dev?'Tapni naziv za povezivanje':c.state==='idle'?c.msg+' · tapni naziv za spajanje':c.msg;st.classList.toggle('err',c.state==='err');
+    let pa=el.querySelector('.pba');if(!pa){pa=document.createElement('button');pa.className='pba';pa.onclick=()=>openPb(c);el.querySelector('.top').after(pa)}
+    pa.style.display=c.pbAlert?'':'none';pa.textContent='Tipkalo se resetiralo · tapni za vraćanje';
     const gr=el.querySelector('.gr');gr.style.display=c.fmt==='ext'?'':'none';
     gr.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g,s=gState(c,g),on=!!(s&&s.on);
       b.querySelector('.tx span').textContent=gName(c,g);b.querySelector('b').textContent=s?(on?s.pct+'%':'off'):'–';
@@ -424,10 +490,11 @@ $('#sSw').onclick=()=>{const {c,g}=cur;const on=$('#sSw').getAttribute('aria-pre
 $('#sName').addEventListener('change',()=>{const {c,g}=cur;if(g){store.set('gname_'+c.id+'_'+g,$('#sName').value.trim()||'Grupa '+g);render()}});
 $('#sConn').onclick=()=>{const {c}=cur;try{c.dev&&c.dev.gatt.disconnect()}catch{}c.chars=null;c.dev?auto(c):relink(c)};
 $('#sPw').onclick=async()=>{const {c}=cur;$('#sheet').close();const pw=await askPw(c.name);if(pw!=null){store.set('pw_'+c.id,pw);store.set('tok_'+c.id+'_1',null);store.set('tok_'+c.id+'_2',null);log(c.name,'lozinka spremljena')}};
+$('#sPb').onclick=()=>{const {c}=cur;$('#sheet').close();openPb(c)};
 $('#sDel').onclick=()=>{const {c}=cur;$('#sheet').close();c.forget()};
 $('#sClose').onclick=()=>$('#sheet').close();
 $('#sheet').addEventListener('close',()=>{cur=null});
-for(const d of ['#sheet','#setd','#scd','#nd','#td'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
+for(const d of ['#sheet','#setd','#scd','#nd','#td','#pbd'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
 
 /* ---------- connecting ---------- */
 function saveIds(){store.set('ids',[...ctrls.keys()])}
@@ -534,6 +601,36 @@ $('#bConn').onclick=()=>{for(const c of ctrls.values())if(c.dev)auto(c)};
 $('#optUser').checked=store.get('user',false);
 $('#optUser').onchange=e=>store.set('user',e.target.checked);
 $('#bForget').onclick=()=>{try{Object.keys(localStorage).filter(k=>/^svj_(pw|tok)_/.test(k)).forEach(k=>localStorage.removeItem(k))}catch{}log('Lozinke i tokeni obrisani')};
+
+/* ---------- push buttons ---------- */
+const PBC={0:'isključeno',1:'upali',2:'ugasi',3:'upali/ugasi',4:'pojačaj',5:'smanji',6:'dimanje',7:'toplije',8:'hladnije',9:'temp. boje',10:'start/stop regulacije',11:'upali/ugasi reg. grupu',12:'dimanje reg. grupe',13:'nastavi regulaciju',14:'HCL 2',15:'HCL 3',16:'scena',17:'spremi scenu',18:'nastavi HCL',19:'izmjena scena'};
+const cmdTxt=b=>{const c=b&31,x=b>>5;return (PBC[c]||('naredba '+c))+((c===16||c===17)?' '+(x+1):'')};
+const grpTxt=m=>{m&=15;if(!m||m===15)return 'sve grupe';return [1,2,3,4].filter(g=>m>>(g-1)&1).map(g=>'G'+g).join(', ')};
+let pbC=null;
+function renderPb(){const c=pbC;if(!c)return;const p=c.pb,snap=store.get('pbsnap_'+c.id,null);
+  $('#pbSub').textContent=c.name;
+  if(!p){$('#pbList').innerHTML='';return}
+  $('#pbBeh').value=p.behaviour;
+  const L=$('#pbList');L.innerHTML='';
+  if(!p.couplers.length)L.innerHTML='<p class="hint" style="margin:0 2px 10px">Kontroler nije javio nijedan coupler. Pošalji mi dnevnik iz postavki.</p>';
+  p.couplers.forEach((cp,i)=>{const d=cp.data,box=document.createElement('div');box.className='cp';
+    let h='<h4>Coupler '+(i+1)+'</h4>';
+    for(let ch=0;ch<4;ch++){const o=1+ch*4;
+      const desc=cp.prop===42?('kratko: '+cmdTxt(d[o])+' · dugo: '+cmdTxt(d[o+1])+' · '+grpTxt(d[o+3])):('kratko: '+cmdTxt(d[o])+' · dugo: '+cmdTxt(d[o+1])+' · '+grpTxt(d[o+2]));
+      h+='<div class="ln"><b>Ulaz '+'ABCD'[ch]+'</b><span>'+desc+'</span></div>'}
+    h+='<code>'+toHex(d)+'</code>';box.innerHTML=h;L.appendChild(box)});
+  let st='Spremljenog stanja još nema. Kad tipkala rade ispravno, tapni „Spremi kao ispravno stanje“.';
+  if(snap){const same=p.couplers.length===snap.couplers.length&&snap.couplers.every(s=>{const x=p.couplers.find(q=>q.id===s.id&&q.prop===s.prop);return x&&toHex(x.data)===toHex(s.data)});
+    st=same?'<span class="ok-t">Odgovara spremljenom stanju</span> (spremljeno '+new Date(snap.at).toLocaleDateString('hr')+')':'<span class="bad-t">Razlikuje se od spremljenog stanja.</span> Tapni „Vrati spremljeno“.'}
+  $('#pbStatus').innerHTML=st;$('#pbRestore').disabled=!snap;$('#pbAuto').checked=store.get('pbauto_'+c.id,false)}
+async function loadPb(){const c=pbC;$('#pbStatus').textContent='Čitam postavke…';
+  try{await c.run(async()=>{await c.connect();await c.readPb()});renderPb()}catch(e){$('#pbStatus').textContent='Greška: '+e.message}}
+function openPb(c){if(!c.dev)return relink(c);pbC=c;renderPb();$('#pbd').showModal();loadPb()}
+$('#pbBehSave').onclick=async()=>{const c=pbC;$('#pbStatus').textContent='Spremam…';try{await c.setPbBehaviour(+$('#pbBeh').value);$('#pbStatus').innerHTML='<span class="ok-t">Ponašanje tipkala spremljeno.</span>'}catch(e){$('#pbStatus').textContent='Greška: '+e.message}};
+$('#pbSnap').onclick=()=>{const c=pbC;if(!c.pb)return;store.set('pbsnap_'+c.id,{behaviour:c.pb.behaviour,couplers:c.pb.couplers,at:Date.now()});c.pbAlert=false;renderPb();render()};
+$('#pbRestore').onclick=async()=>{const c=pbC;$('#pbStatus').textContent='Vraćam…';try{await c.restorePb();renderPb()}catch(e){$('#pbStatus').textContent='Greška: '+e.message}};
+$('#pbAuto').onchange=e=>store.set('pbauto_'+pbC.id,e.target.checked);
+$('#pbReload').onclick=loadPb;$('#pbClose').onclick=()=>$('#pbd').close();
 
 /* ---------- theme: auto = light between sunrise and sunset (Pula) ---------- */
 function sunTimes(d,lat,lon){const r=Math.PI/180,y=d.getFullYear(),day=Math.floor((Date.UTC(y,d.getMonth(),d.getDate())-Date.UTC(y,0,0))/864e5),g=2*Math.PI/365*(day-1);
