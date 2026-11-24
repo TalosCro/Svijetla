@@ -122,9 +122,6 @@ function toHex(b){return [...b].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function log(...a){const l=$('#log');l.textContent=(new Date().toLocaleTimeString()+' '+a.join(' ')+'\n'+l.textContent).slice(0,20000)}
 const store={get(k,d){try{const v=localStorage.getItem('svj_'+k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem('svj_'+k,JSON.stringify(v))}catch{}}};
 
-/* DALI log curve, same as original app */
-const pctToDali=p=>p<=0?0:Math.min(254,Math.round((Math.log10(Math.min(100,p))+1)*84.33333333333333+1));
-const daliToPct=v=>v===0||v===255?0:Math.round(10**((v-1)/84.33333333333333-1));
 
 /* Password encryption: PBKDF2-SHA1(1000) -> AES-256-CBC, as in original app */
 let aesKey,aesIv;
@@ -143,12 +140,14 @@ async function authHash(userType,cr,sc,pw16){
 }
 
 class Ctrl{
-  constructor(dev){this.dev=dev;this.id=dev.id;this.state='idle';this.msg='Nije spojen';this.on=false;this.pct=0;this.q=Promise.resolve();this.fmt=store.get('fmt_'+dev.id,'ext');
-    this.name=niceName(dev.name||store.get('name_'+dev.id,'Kontroler'));if(dev.name)store.set('name_'+dev.id,dev.name);
-    dev.addEventListener('gattserverdisconnected',()=>{this.set('idle','Veza prekinuta');this.chars=null});}
+  constructor(dev,id){this.id=dev?dev.id:id;this.dev=null;this.state='idle';this.msg='Nije spojen';this.on=false;this.pct=0;this.q=Promise.resolve();this.fmt=store.get('fmt_'+this.id,'ext');
+    this.full=store.get('name_'+this.id,'Kontroler');this.name=niceName(this.full);if(dev)this.attach(dev)}
+  attach(dev){this.dev=dev;if(dev.name){this.full=dev.name;this.name=niceName(dev.name);store.set('name_'+this.id,dev.name)}
+    dev.addEventListener('gattserverdisconnected',()=>{this.chars=null;this.set('idle','Veza prekinuta')});render()}
   set(s,m){this.state=s;this.msg=m;render()}
   run(fn){const p=this.q.then(fn,fn);this.q=p.catch(()=>{});return p}
   async connect(){
+    if(!this.dev)throw new Error('Tapni naziv za ponovno povezivanje');
     if(this.dev.gatt.connected&&this.chars)return;
     this.set('busy','Spajanje…');
     try{
@@ -158,7 +157,7 @@ class Ctrl{
       this.set('busy','Prijava…');
       await this.auth();
       await this.readState();
-      try{await this.chars.lvl.startNotifications();this.chars.lvl.addEventListener('characteristicvaluechanged',e=>this.onLevel(new Uint8Array(e.target.value.buffer)))}catch(e){log(this.name,'notify',e.message)}
+      try{await this.chars.lvl.startNotifications();this.chars.lvl.addEventListener('characteristicvaluechanged',e=>this.onLevel(new Uint8Array(e.target.value.buffer),true))}catch(e){log(this.name,'notify',e.message)}
       this.set('ok','Spojen');
     }catch(e){log(this.name,'GREŠKA',e.message);this.set('err',e.message.slice(0,80));try{this.dev.gatt.disconnect()}catch{}this.chars=null;throw e}
   }
@@ -176,7 +175,7 @@ class Ctrl{
   }
   async auth(){
     const ut=$('#optUser').checked?2:1;
-    const tok=hex(store.get('tok_'+this.id+'_'+ut,'0000000000000000'));
+    const tok=hex(store.get('tok_'+this.id+'_'+ut,null)||'0000000000000000');
     const ch=await this.medium(14,0,new Uint8Array([ut,...tok]));
     const ans=ch[0];log(this.name,'challenge odgovor',ans);
     if(ans===0)return;
@@ -184,36 +183,35 @@ class Ctrl{
     if(ans===1)pw16=DEFAULT_PW;
     else if(ans===2){
       let pw=store.get('pw_'+this.id,null);
-      if(pw==null){pw=await askPw(this.name);if(pw==null)throw new Error('Prijava otkazana')}
-      pw16=await encryptPwd(pw);this._pw=pw;
+      if(pw==null){pw=await askPw(this.name);if(pw==null)throw new Error('Prijava otkazana');if($('#dsave').checked)store.set('pw_'+this.id,pw)}
+      pw16=await encryptPwd(pw);
     }else throw new Error(ans===3?'Previše pokušaja, pričekaj pa probaj opet':'Kontroler odbija prijavu ('+ans+')');
     const sc=ch.slice(1,9),cr=crypto.getRandomValues(new Uint8Array(8));
     const h=await authHash(ut,cr,sc,pw16);
     const r=await this.medium(14,1,new Uint8Array([ut,...cr,...h]));
     const t=r.slice(0,8);
-    if(t.every(x=>x===0)){store.set('pw_'+this.id,null);throw new Error(ans===2?'Kriva lozinka':'Prijava odbijena')}
+    if(t.every(x=>x===0)){if(ans===2)store.set('pw_'+this.id,null);throw new Error(ans===2?'Kriva lozinka':'Prijava odbijena')}
     store.set('tok_'+this.id+'_'+ut,toHex(t));
-    if(this._pw!=null&&this._save)store.set('pw_'+this.id,this._pw);
     log(this.name,'prijava OK');
   }
   async readState(){
-    try{const v=new Uint8Array((await this.chars.lvl.readValue()).buffer);this.onLevel(v)}catch(e){log(this.name,'čitanje razine',e.message)}
+    try{const v=new Uint8Array((await this.chars.cmd.readValue()).buffer);if(v.length)this.on=v[0]!==0;log(this.name,'stanje',toHex(v))}catch(e){log(this.name,'čitanje stanja',e.message)}
+    try{const v=new Uint8Array((await this.chars.lvl.readValue()).buffer);log(this.name,'razina',toHex(v));this.onLevel(v,false)}catch(e){log(this.name,'čitanje razine',e.message)}
     await this.readGroups();
   }
-  /* LiveData topic 7, prop 30: data[1+3*i] = DALI level of group i+1 */
+  /* LiveData topic 7, prop 30: data[1+3*i] = level (0-100 %) of group i+1 */
   async readGroups(){
     if(this.fmt!=='ext')return;
-    try{const d=await this.medium(7,30,new Uint8Array(13));
-      this.groups=[0,1,2,3].map(i=>{const v=d[1+3*i];return {on:v>0&&v!==255,pct:daliToPct(v)}});render();
+    try{const d=await this.medium(7,30,new Uint8Array(13));log(this.name,'grupe',toHex(d.slice(0,13)));
+      this.groups=[0,1,2,3].map(i=>{const v=lv(d[1+3*i]);return {on:v>0,pct:v}});
+      if(this.groups.some(g=>g.on))this.on=true;render();
     }catch(e){log(this.name,'čitanje grupa',e.message)}
   }
-  setGroupOn(g,on){return this.run(async()=>{await this.connect();const s=on?1:0;
-    await this.chars.cmd.writeValueWithResponse(new Uint8Array([s,1,1,g]));
-    await sleep(150);await this.readGroups()})}
-  setGroupPct(g,p){return this.run(async()=>{await this.connect();const d=pctToDali(p);
-    await this.chars.lvl.writeValueWithResponse(new Uint8Array([d,0,0,0,1,1,g]));
-    if(this.groups)this.groups[g-1]={on:d>0,pct:p};render()})}
-  onLevel(v){if(!v.length)return;this.pct=daliToPct(v[0]);this.on=v[0]>0&&v[0]!==255;render()}
+  /* level characteristic: [level%, changeTw, twLo, twHi, (1, cmdType, address)] */
+  onLevel(v,notif){if(!v.length)return;const p=lv(v[0]);
+    if(v.length>=7&&v[5]===1&&v[6]>=1&&v[6]<=4){if(this.groups)this.groups[v[6]-1]={on:p>0,pct:p}}
+    else{if(p>0)this.pct=p;if(notif)this.on=p>0}
+    render()}
   async write(ch,ext,short){
     if(this.fmt==='ext'){
       try{await ch.writeValueWithResponse(ext);return}
@@ -221,14 +219,21 @@ class Ctrl{
     }
     await ch.writeValueWithResponse(short);
   }
+  setGroupOn(g,on){return this.run(async()=>{await this.connect();
+    await this.chars.cmd.writeValueWithResponse(new Uint8Array([on?1:0,1,1,g]));
+    if(this.groups)this.groups[g-1].on=on;render();await sleep(200);await this.readGroups()})}
+  setGroupPct(g,p){return this.run(async()=>{await this.connect();
+    await this.chars.lvl.writeValueWithResponse(new Uint8Array([p,0,0xff,0xff,1,1,g]));
+    if(this.groups)this.groups[g-1]={on:p>0,pct:p};render()})}
   setOn(on){return this.run(async()=>{await this.connect();const s=on?1:0;
     await this.write(this.chars.cmd,new Uint8Array([s,1,0,0]),new Uint8Array([s]));
-    this.on=on;if(on&&!this.pct)this.pct=100;await sleep(150);await this.readState();render()})}
-  setPct(p){return this.run(async()=>{await this.connect();const d=pctToDali(p);
-    await this.write(this.chars.lvl,new Uint8Array([d,0,0,0,1,0,0]),new Uint8Array([d,0,0,0]));
-    this.pct=p;this.on=d>0;await sleep(150);await this.readGroups();render()})}
-  forget(){try{this.dev.gatt.disconnect()}catch{}const ids=store.get('ids',[]).filter(i=>i!==this.id);store.set('ids',ids);ctrls.delete(this.id);try{this.dev.forget&&this.dev.forget()}catch{}render()}
+    this.on=on;render();await sleep(200);await this.readGroups()})}
+  setPct(p){return this.run(async()=>{await this.connect();
+    await this.write(this.chars.lvl,new Uint8Array([p,0,0xff,0xff,1,0,0]),new Uint8Array([p,0,0xff,0xff]));
+    if(p>0)this.pct=p;this.on=p>0;render();await sleep(200);await this.readGroups()})}
+  forget(){try{this.dev&&this.dev.gatt.disconnect()}catch{}const ids=store.get('ids',[]).filter(i=>i!==this.id);store.set('ids',ids);ctrls.delete(this.id);try{this.dev&&this.dev.forget&&this.dev.forget()}catch{}render()}
 }
+const lv=v=>v>100?(v===255?0:100):v;
 function niceName(n){const i=n.search(/[_-]/);return (i>=0&&/^(Osbt|Invt|Ledv|Leye)/.test(n)?n.slice(i+1):n).trim()||n}
 
 
@@ -255,10 +260,10 @@ function card(c){
   const el=document.createElement('div');el.className='card';el.id='c_'+c.id;
   el.innerHTML='<div class="top"><span class="dot"></span><button class="nm"></button><span class="pc"></span><button class="sw" aria-label="Upali ili ugasi cijeli kontroler"></button></div><div class="st"></div><div class="gr">'+
     [1,2,3,4].map(g=>'<button class="ch" data-g="'+g+'"><span></span><b></b></button>').join('')+'</div>';
-  el.querySelector('.sw').onclick=()=>c.setOn(!c.on).catch(()=>{});
-  press(el.querySelector('.nm'),()=>{if(c.state!=='ok')c.run(()=>c.connect()).catch(()=>{});else openSheet(c,0)},()=>openSheet(c,0));
+  el.querySelector('.sw').onclick=()=>{if(!c.dev)return relink(c);c.setOn(!c.on).catch(()=>{})};
+  press(el.querySelector('.nm'),()=>{if(!c.dev)relink(c);else if(c.state!=='ok')c.run(()=>c.connect()).catch(()=>{});else openSheet(c,0)},()=>openSheet(c,0));
   el.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g;
-    press(b,()=>{const s=gState(c,g);c.setGroupOn(g,!(s&&s.on)).catch(()=>{})},()=>openSheet(c,g))});
+    press(b,()=>{if(!c.dev)return relink(c);const s=gState(c,g);c.setGroupOn(g,!(s&&s.on)).catch(()=>{})},()=>openSheet(c,g))});
   return el;
 }
 function render(){
@@ -274,7 +279,7 @@ function render(){
     el.querySelector('.pc').textContent=c.on?c.pct+'%':'';
     el.querySelector('.sw').setAttribute('aria-pressed',c.on);
     const st=el.querySelector('.st');const showSt=c.state!=='ok';st.style.display=showSt?'':'none';
-    st.textContent=c.state==='idle'?c.msg+' · tapni naziv za spajanje':c.msg;st.classList.toggle('err',c.state==='err');
+    st.textContent=!c.dev?'Tapni naziv za povezivanje':c.state==='idle'?c.msg+' · tapni naziv za spajanje':c.msg;st.classList.toggle('err',c.state==='err');
     const gr=el.querySelector('.gr');gr.style.display=c.fmt==='ext'?'':'none';
     gr.querySelectorAll('.ch').forEach(b=>{const g=+b.dataset.g,s=gState(c,g);
       b.querySelector('span').textContent=gName(c,g);b.querySelector('b').textContent=s?(s.on?s.pct+'%':'off'):'–';
@@ -307,29 +312,50 @@ $('#sClose').onclick=()=>$('#sheet').close();
 $('#sheet').addEventListener('close',()=>{cur=null});
 for(const d of ['#sheet','#setd'])$(d).addEventListener('click',e=>{if(e.target===$(d))$(d).close()});
 
-function addDev(dev){if(ctrls.has(dev.id))return ctrls.get(dev.id);const c=new Ctrl(dev);ctrls.set(dev.id,c);const ids=store.get('ids',[]);if(!ids.includes(dev.id)){ids.push(dev.id);store.set('ids',ids)}render();return c}
+const FILTERS=[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],OPT=[UUID.light,UUID.conf,UUID.ident];
+function saveIds(){store.set('ids',[...ctrls.keys()])}
+function addDev(dev){if(ctrls.has(dev.id)){const c=ctrls.get(dev.id);if(!c.dev)c.attach(dev);return c}const c=new Ctrl(dev);ctrls.set(dev.id,c);saveIds();render();return c}
+/* auto-connect: direct, or when the controller is next heard advertising */
+function auto(c){c.run(()=>c.connect()).catch(()=>{
+  if(c.dev&&c.dev.watchAdvertisements&&!c.watching){c.watching=true;
+    c.dev.addEventListener('advertisementreceived',()=>{if(c.state==='ok')return;c.run(()=>c.connect()).catch(()=>{})});
+    c.dev.watchAdvertisements().then(()=>log(c.name,'čekam signal kontrolera…')).catch(e=>{c.watching=false;log(c.name,'watch',e.message)})}
+})}
+/* reconnect a remembered controller: chooser shows only that one */
+async function relink(c){
+  try{const dev=await navigator.bluetooth.requestDevice({filters:[{name:c.full}],optionalServices:OPT});
+    if(dev.id!==c.id){
+      try{for(const k of Object.keys(localStorage))if(k.startsWith('svj_')&&k.includes(c.id))localStorage.setItem(k.split(c.id).join(dev.id),localStorage.getItem(k))}catch{}
+      const m=[...ctrls.entries()].map(([k,v])=>k===c.id?[dev.id,v]:[k,v]);ctrls.clear();m.forEach(([k,v])=>ctrls.set(k,v));
+      document.getElementById('c_'+c.id)?.remove();c.id=dev.id;saveIds();
+    }
+    c.attach(dev);auto(c);
+  }catch(e){if(e.name!=='NotFoundError')log('Povezivanje',e.message)}
+}
 $('#bAdd').onclick=async()=>{
-  try{const dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Osbt'},{namePrefix:'Invt'},{namePrefix:'Ledv'},{namePrefix:'Leye'}],optionalServices:[UUID.light,UUID.conf,UUID.ident]});
-    const c=addDev(dev);c.run(()=>c.connect()).catch(()=>{});
-  }catch(e){if(e.name!=='NotFoundError')log('Dodavanje',e.message)}
+  try{const dev=await navigator.bluetooth.requestDevice({filters:FILTERS,optionalServices:OPT});auto(addDev(dev))}
+  catch(e){if(e.name!=='NotFoundError')log('Dodavanje',e.message)}
 };
 $('#bSet').onclick=()=>$('#setd').showModal();
 $('#setClose').onclick=()=>$('#setd').close();
-$('#bConn').onclick=()=>{for(const c of ctrls.values())c.run(()=>c.connect()).catch(()=>{})};
-$('#bAll1').onclick=()=>{for(const c of ctrls.values())c.setOn(true).catch(()=>{})};
-$('#bAll0').onclick=()=>{for(const c of ctrls.values())c.setOn(false).catch(()=>{})};
+$('#bConn').onclick=()=>{for(const c of ctrls.values())if(c.dev)auto(c)};
+$('#bAll1').onclick=()=>{for(const c of ctrls.values())if(c.dev)c.setOn(true).catch(()=>{})};
+$('#bAll0').onclick=()=>{for(const c of ctrls.values())if(c.dev)c.setOn(false).catch(()=>{})};
 $('#optUser').checked=store.get('user',false);
 $('#optUser').onchange=e=>store.set('user',e.target.checked);
 $('#bForget').onclick=()=>{try{Object.keys(localStorage).filter(k=>/^svj_(pw|tok)_/.test(k)).forEach(k=>localStorage.removeItem(k))}catch{}log('Lozinke i tokeni obrisani')};
 
 (async()=>{
   if(!navigator.bluetooth){$('#warn').innerHTML='<div class="warn">Ovaj preglednik ne podržava Web Bluetooth. Otvori stranicu u <b>Chromeu na Androidu</b>.</div>';['#bAdd','#bConn','#bAll1','#bAll0'].forEach(s=>$(s).disabled=true);render();return}
+  for(const id of store.get('ids',[]))if(!ctrls.has(id))ctrls.set(id,new Ctrl(null,id));
+  render();
   if(navigator.bluetooth.getDevices){
-    try{const devs=await navigator.bluetooth.getDevices();const ids=store.get('ids',[]);
-      for(const id of ids){const d=devs.find(x=>x.id===id);if(d)addDev(d)}
-      if(ctrls.size){log('Pronađeno spremljenih kontrolera:',ctrls.size);for(const c of ctrls.values())c.run(()=>c.connect()).catch(()=>{})}
+    try{const devs=await navigator.bluetooth.getDevices();let n=0;
+      for(const d of devs){const c=ctrls.get(d.id);if(c){c.attach(d);auto(c);n++}}
+      log('Zapamćenih kontrolera:',ctrls.size,'· Chrome ih je vratio:',n);
+      if(ctrls.size&&!n)log('Uključi chrome://flags/#enable-web-bluetooth-new-permissions-backend da se kontroleri spajaju sami.');
     }catch(e){log('getDevices',e.message)}
-  }else log('Preglednik ne pamti uređaje između posjeta; kontrolere dodaj ponovno nakon osvježavanja.');
+  }else log('getDevices nije dostupan: uključi chrome://flags/#enable-web-bluetooth-new-permissions-backend');
   render();
 })();
 }
